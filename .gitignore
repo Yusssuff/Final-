@@ -1,0 +1,17 @@
+## Build and compile outputs
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio & VS Code user files
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+
+## Package and cache folders
+Packages/
+*.nuget.props
+*.nuget.targets
+project.assets.json
+project.nuget.cache

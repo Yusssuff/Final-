@@ -1,15 +1,27 @@
+using Final_Task.Data;
+using SalesBuzz.Shared.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 builder.Services.AddControllers();
 
-// Swagger
+builder.Services.AddMemoryCache();
+
+
+builder.Services.AddSalesBuzzCurrentBU();
+
+builder.Services.AddSalesBuzzDb<AppDbContext>(
+    builder.Configuration
+);
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

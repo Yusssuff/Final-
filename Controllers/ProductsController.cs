@@ -20,5 +20,34 @@ namespace Final_Task.Controllers
         {
             return Ok(_db.Products);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProduct(int id)
+        {
+            var product = await _db.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return Ok(product);
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct(Product product)
+        {
+             Product p = new ()
+            {
+                 
+                 Name =  product.Name,
+                Price = product.Price,
+                Quantity = product.Quantity
+            };
+            await _db.Products.AddAsync(p);
+            await _db.SaveChangesAsync();
+            return Ok(p);
+
+        }
     }
 }

@@ -4358,11 +4358,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Final-Task\\Final-Task.csproj",
+      "projectUniqueName": "D:\\𝓎𝓊𝓈𝓈𝓊𝒻\\Final-\\Final-Task.csproj",
       "projectName": "Final-Task",
-      "projectPath": "D:\\Final-Task\\Final-Task.csproj",
+      "projectPath": "D:\\𝓎𝓊𝓈𝓈𝓊𝒻\\Final-\\Final-Task.csproj",
       "packagesPath": "D:\\nuget",
-      "outputPath": "D:\\Final-Task\\obj\\",
+      "outputPath": "D:\\𝓎𝓊𝓈𝓈𝓊𝒻\\Final-\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\shared\\NuGetPackages"

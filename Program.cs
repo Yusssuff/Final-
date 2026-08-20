@@ -1,13 +1,12 @@
 using Final_Task.Data;
 using SalesBuzz.Shared.Data;
+using SalesBuzz.Shared.OData;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers();
 
 builder.Services.AddMemoryCache();
-
 
 builder.Services.AddSalesBuzzCurrentBU();
 
@@ -16,9 +15,9 @@ builder.Services.AddSalesBuzzDb<AppDbContext>(
 );
 
 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 var app = builder.Build();
 

@@ -49,5 +49,38 @@ namespace Final_Task.Controllers
             return Ok(p);
 
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, Product product)
+        {
+            var existingProduct = await _db.Products.FindAsync(id);
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
+
+            existingProduct.Name = product.Name;
+            existingProduct.Price = product.Price;
+            existingProduct.Quantity = product.Quantity;
+
+            await _db.SaveChangesAsync();
+            return Ok(existingProduct);
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var existingProduct = await _db.Products.FindAsync(id);
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
+            _db.Products.Remove(existingProduct);
+            await _db.SaveChangesAsync();
+            return Ok(existingProduct);
+        }
+
+
     }
 }

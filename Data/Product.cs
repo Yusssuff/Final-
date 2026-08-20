@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace Final_Task.Data
 {
     public class Product
@@ -12,8 +13,8 @@ namespace Final_Task.Data
         public string Name { get; set; } = string.Empty;
 
         [Required]
-        
-        public double Price { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Price { get; set; }
 
         [Required]
         public int Quantity { get; set; }

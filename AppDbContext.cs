@@ -13,7 +13,7 @@ public class AppDbContext : SalesBuzzDbContextBase
     }
 
     public DbSet<Product> Products => Set<Product>();
-
+    public DbSet<Order> Orders => Set<Order>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

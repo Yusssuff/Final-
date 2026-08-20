@@ -1,6 +1,7 @@
 ﻿using Final_Task.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Final_Task.Controllers
 {
@@ -41,11 +42,107 @@ namespace Final_Task.Controllers
                 OrderDate = DateTime.UtcNow,
                 Product = product
             };
+            product.Quantity -= request.Quantity;
 
             await _db.Orders.AddAsync(order);
             await _db.SaveChangesAsync();
 
+            order.Product = product;
+
             return Ok(order);
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrder(int id)
+        {
+            var order = await _db.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return Ok(order);
+        }
+
+
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateOrder(int id,CreateOrderRequest request)
+        {
+            if (request.Quantity <= 0)
+            {
+                return BadRequest("Quantity must be greater than zero.");
+            }
+
+            var existingOrder = await _db.Orders
+                .Include(o => o.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (existingOrder == null)
+            {
+                return NotFound("Order not found.");
+            }
+
+            var newProduct = await _db.Products
+                .FirstOrDefaultAsync(p => p.Id == request.ProductId);
+
+            if (newProduct == null)
+            {
+                return NotFound("Product not found.");
+            }
+
+            if (existingOrder.Product != null)
+            {
+                existingOrder.Product.Quantity += existingOrder.Quantity;
+            }
+
+            if (request.Quantity > newProduct.Quantity)
+            {
+                return BadRequest(
+                    $"Not enough stock. Available quantity: {newProduct.Quantity}.");
+            }
+
+            existingOrder.UserId = request.UserId;
+            existingOrder.ProductId = newProduct.Id;
+            existingOrder.Quantity = request.Quantity;
+            existingOrder.TotalPrice = newProduct.Price * request.Quantity;
+            existingOrder.OrderDate = DateTime.UtcNow;
+
+            newProduct.Quantity -= request.Quantity;
+
+            await _db.SaveChangesAsync();
+
+            existingOrder.Product = newProduct;
+
+            return Ok(existingOrder);
+        }
+
+
+
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(int id)
+        {
+            var existingOrder = await _db.Orders
+                .Include(o => o.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (existingOrder == null)
+            {
+                return NotFound("Order not found.");
+            }
+
+            if (existingOrder.Product != null)
+            {
+                existingOrder.Product.Quantity += existingOrder.Quantity;
+            }
+
+            _db.Orders.Remove(existingOrder);
+
+            await _db.SaveChangesAsync();
+
+            return Ok(existingOrder);
         }
 
 

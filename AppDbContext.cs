@@ -14,8 +14,29 @@ public class AppDbContext : SalesBuzzDbContextBase
 
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<User> Users => Set<User>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(u => u.Id);
+
+            entity.Property(u => u.Username)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.HasIndex(u => u.Username)
+                .IsUnique();
+
+            entity.Property(u => u.PasswordHash)
+                .IsRequired();
+
+            entity.Property(u => u.Role)
+                .IsRequired()
+                .HasMaxLength(20);
+        });
     }
-} 
+}

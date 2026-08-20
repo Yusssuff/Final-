@@ -1,6 +1,6 @@
 using Final_Task.Data;
+using SalesBuzz.Shared.Authorization;
 using SalesBuzz.Shared.Data;
-using SalesBuzz.Shared.OData;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +14,8 @@ builder.Services.AddSalesBuzzDb<AppDbContext>(
     builder.Configuration
 );
 
-
+builder.Services.AddSalesBuzzJwt(builder.Configuration);
+builder.Services.AddAuthorization();    
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -28,6 +29,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

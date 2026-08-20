@@ -1,12 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
 using Final_Task.Data;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
 using SalesBuzz.Shared.Authorization;
 
 namespace Final_Task.Controllers
@@ -123,12 +120,7 @@ namespace Final_Task.Controllers
                     });
             }
 
-            /*
-             * IMPORTANT:
-             *
-             * Use the exact Microsoft.IdentityModel.Tokens
-             * assembly referenced by the SalesBuzz SDK.
-             */
+
             var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
             var securityKey =

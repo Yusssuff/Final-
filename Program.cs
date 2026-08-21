@@ -1,30 +1,49 @@
 using Final_Task.Data;
+using Microsoft.AspNetCore.Identity;
 using SalesBuzz.Shared.Authorization;
 using SalesBuzz.Shared.Data;
+using SalesBuzz.Shared.Filters;
 using SalesBuzz.Shared.Middleware;
-using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 builder.Services.AddControllers();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 
+
+
+
 builder.Services.AddSalesBuzzCurrentBU();
+
 
 builder.Services.AddSalesBuzzDb<AppDbContext>(
     builder.Configuration
 );
 
-builder.Services.AddSalesBuzzJwt(builder.Configuration);
+
+builder.Services.AddSalesBuzzJwt(
+    builder.Configuration
+);
+
 builder.Services.AddAuthorization();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<
+    IPasswordHasher<User>,
+    PasswordHasher<User>
+>();
 
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<SalesBuzzPermissionService>();
+
 
 var app = builder.Build();
+
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -36,8 +55,6 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
-// Rejects any [Authorize] request whose JWT jti isn't a live row in SA_Sessions
-// (i.e. logged out / expired / never-issued-via-our-Login sessions).
 app.UseSalesBuzzTokenValidation();
 
 app.UseAuthorization();
@@ -45,3 +62,61 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+
+public sealed class SalesBuzzPermissionService
+{
+    private readonly IPermissions _permissions;
+
+    public SalesBuzzPermissionService(
+        IPermissions permissions)
+    {
+        _permissions = permissions;
+    }
+
+    
+    public bool HasPermission(
+        string operation,
+        PermissionKind permission)
+    {
+        if (string.IsNullOrWhiteSpace(operation))
+        {
+            return false;
+        }
+
+        return _permissions.IsValidOperationPermission(
+            operation,
+            permission
+        );
+    }
+
+
+    public bool HasExplicitPermission(
+        string operation,
+        PermissionKind permission)
+    {
+        if (string.IsNullOrWhiteSpace(operation))
+        {
+            return false;
+        }
+
+        return _permissions.IsValidOperationPermission(
+            operation,
+            permission,
+            explicitly: true
+        );
+    }
+
+
+    public void UpdateUserPermissions(
+        string roleId)
+    {
+        if (string.IsNullOrWhiteSpace(roleId))
+        {
+            return;
+        }
+
+        _permissions.UpdateUserPermissions(roleId);
+    }
+}

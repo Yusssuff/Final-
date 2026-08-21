@@ -1,9 +1,6 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+﻿using Microsoft.AspNetCore.Mvc;
 using Final_Task.Data;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+using AuthMethod; 
 using SalesBuzz.Shared.Authorization;
 
 namespace Final_Task.Controllers
@@ -12,143 +9,72 @@ namespace Final_Task.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        // Injecting the SDK's native authentication logic
+        private readonly SalesBuzzAuth _salesBuzzAuth;
         private readonly IPermissions _permissions;
-        private readonly IConfiguration _configuration;
 
         public AuthController(
-            UserManager<IdentityUser> userManager,
-            IPermissions permissions,
-            IConfiguration configuration)
+            SalesBuzzAuth salesBuzzAuth,
+            IPermissions permissions)
         {
-            _userManager = userManager;
+            _salesBuzzAuth = salesBuzzAuth;
             _permissions = permissions;
-            _configuration = configuration;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(
-            [FromBody] AuthRequest request)
+        public async Task<IActionResult> Login([FromBody] AuthRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            // Find user
-            var user = await _userManager.FindByNameAsync(
-                request.Username);
-
-            if (user == null)
+            try
             {
-                return Unauthorized(new
+                // NOTE: Type "_salesBuzzAuth." in Visual Studio to let IntelliSense 
+                // show you the exact method name. I am using "LoginAsync" as an assumption.
+
+                var loginResponse = await _salesBuzzAuth.LoginAsync(request.Username, request.Password);
+
+                // If the SDK returns null/false on failure
+                if (loginResponse == null)
                 {
-                    message = "Invalid username or password."
-                });
-            }
-
-            // Validate password
-            var passwordValid =
-                await _userManager.CheckPasswordAsync(
-                    user,
-                    request.Password);
-
-            if (!passwordValid)
-            {
-                return Unauthorized(new
-                {
-                    message = "Invalid username or password."
-                });
-            }
-
-            // Get user's roles
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if (roles.Count == 0)
-            {
-                return Unauthorized(new
-                {
-                    message = "User has no assigned role."
-                });
-            }
-
-            // Current application roles:
-            // Admin / User
-            var role = roles[0];
-
-            // Load SalesBuzz permissions for this role
-            _permissions.UpdateUserPermissions(role);
-
-            // Create claims
-            var claims = new List<Claim>
-            {
-                new Claim(
-                    ClaimTypes.NameIdentifier,
-                    user.Id),
-
-                new Claim(
-                    ClaimTypes.Name,
-                    user.UserName ?? request.Username),
-
-                new Claim(
-                    ClaimTypes.Role,
-                    role)
-            };
-
-            // Add all roles
-            foreach (var userRole in roles)
-            {
-                if (userRole != role)
-                {
-                    claims.Add(
-                        new Claim(
-                            ClaimTypes.Role,
-                            userRole));
+                    return Unauthorized(new { message = "Invalid username or password." });
                 }
+
+                // If the SDK requires you to manually trigger permission updates after auth
+                // _permissions.UpdateUserPermissions(loginResponse.Role);
+
+                return Ok(loginResponse);
+            }
+            catch (Exception ex)
+            {
+                // The SDK likely throws an exception if the user is not found or password is bad
+                return Unauthorized(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] AuthRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
 
-            // Read JWT settings
-            var jwtKey = _configuration["JWT:Key"];
-
-            if (string.IsNullOrWhiteSpace(jwtKey))
+            try
             {
-                return StatusCode(
-                    StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        message = "JWT:Key is missing from configuration."
-                    });
+                // NOTE: Again, verify if the SDK actually handles registration. 
+                // Some enterprise SDKs only handle Login, expecting users to be created via an Admin portal.
+
+                var result = await _salesBuzzAuth.RegisterAsync(request.Username, request.Password);
+
+                return Ok(new { message = "User registered successfully via SalesBuzz SDK." });
             }
-
-
-            var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
-
-            var securityKey =
-                new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                    keyBytes);
-
-            var signingCredentials =
-                new Microsoft.IdentityModel.Tokens.SigningCredentials(
-                    securityKey,
-                    Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
-
-            // Generate JWT
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(8),
-                signingCredentials: signingCredentials);
-
-            var tokenString =
-                new JwtSecurityTokenHandler()
-                    .WriteToken(token);
-
-            return Ok(new
+            catch (Exception ex)
             {
-                token = tokenString,
-                userId = user.Id,
-                username = user.UserName,
-                role = role
-            });
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

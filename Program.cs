@@ -7,8 +7,6 @@ using SalesBuzz.Shared.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -16,16 +14,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 
-
-
-
 builder.Services.AddSalesBuzzCurrentBU();
-
 
 builder.Services.AddSalesBuzzDb<AppDbContext>(
     builder.Configuration
 );
-
 
 builder.Services.AddSalesBuzzJwt(
     builder.Configuration
@@ -40,16 +33,29 @@ builder.Services.AddScoped<
 
 builder.Services.AddScoped<SalesBuzzPermissionService>();
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
-
-
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// IMPORTANT:
+// This must use the same policy name that was registered above.
+app.UseCors("AllowAngularApp");
 
 app.UseHttpsRedirection();
 
@@ -64,7 +70,6 @@ app.MapControllers();
 app.Run();
 
 
-
 public sealed class SalesBuzzPermissionService
 {
     private readonly IPermissions _permissions;
@@ -75,7 +80,6 @@ public sealed class SalesBuzzPermissionService
         _permissions = permissions;
     }
 
-    
     public bool HasPermission(
         string operation,
         PermissionKind permission)
@@ -90,7 +94,6 @@ public sealed class SalesBuzzPermissionService
             permission
         );
     }
-
 
     public bool HasExplicitPermission(
         string operation,
@@ -107,7 +110,6 @@ public sealed class SalesBuzzPermissionService
             explicitly: true
         );
     }
-
 
     public void UpdateUserPermissions(
         string roleId)

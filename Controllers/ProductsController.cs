@@ -28,12 +28,7 @@ namespace Final_Task.Controllers
         [HttpGet]
         public IActionResult GetProducts()
         {
-            if (!_permissions.HasPermission(
-                    OperationName,
-                    PermissionKind.Read))
-            {
-                return Forbid();
-            }
+          
 
             return Ok(_db.Products);
         }

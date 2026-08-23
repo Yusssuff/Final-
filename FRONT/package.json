@@ -32,9 +32,9 @@
     "@angular/platform-browser": "^20.2.0",
     "@angular/router": "^20.2.0",
     "@ngx-translate/core": "^15.0.0",
+    "@salesbuzz/public-sdk": "file:Packages/salesbuzz-public-sdk-1.0.2.tgz",
     "bi-interfaces": "file:Packages/bi-interfaces-0.0.1.tgz",
     "bi-modules": "file:Packages/bi-modules-0.0.5.tgz",
-    "@salesbuzz/public-sdk": "file:Packages/salesbuzz-public-sdk-1.0.2.tgz",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

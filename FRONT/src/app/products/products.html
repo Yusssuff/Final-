@@ -1,0 +1,490 @@
+<main class="min-h-screen bg-slate-50 text-slate-900">
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <header
+      class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
+    >
+      <div>
+        <p
+          class="text-sm font-semibold uppercase tracking-widest text-teal-700"
+        >
+          Inventory
+        </p>
+
+        <h1
+          class="mt-2 text-3xl font-bold tracking-tight text-slate-950"
+        >
+          Products
+        </h1>
+
+        <p class="mt-2 text-sm text-slate-500">
+          Manage your catalogue, pricing, and stock levels.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        (click)="openCreateForm()"
+        class="inline-flex items-center justify-center rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+      >
+        <span class="mr-2 text-lg leading-none">+</span>
+        Add Product
+      </button>
+    </header>
+
+    <!-- Success / feedback -->
+    @if (feedbackMessage()) {
+      <div
+        class="mb-5 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-medium text-teal-800"
+        role="status"
+      >
+        {{ feedbackMessage() }}
+      </div>
+    }
+
+    <!-- Error -->
+    @if (errorMessage()) {
+      <div
+        class="mb-5 flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 sm:flex-row sm:items-center sm:justify-between"
+        role="alert"
+      >
+        <span>{{ errorMessage() }}</span>
+
+        <button
+          type="button"
+          (click)="loadProducts()"
+          class="font-semibold underline underline-offset-2 hover:text-red-950"
+        >
+          Retry
+        </button>
+      </div>
+    }
+
+    <!-- Products card -->
+    <section
+      class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+    >
+
+      <!-- Toolbar -->
+      <div
+        class="flex flex-col gap-4 border-b border-slate-200 px-5 py-5 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <h2 class="font-semibold text-slate-950">
+            Product catalogue
+          </h2>
+
+          <p class="mt-1 text-sm text-slate-500">
+            {{ products().length }} total products
+          </p>
+        </div>
+
+        <label class="relative block w-full sm:max-w-xs">
+          <span class="sr-only">
+            Search products
+          </span>
+
+          <span
+            class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400"
+          >
+            ⌕
+          </span>
+
+          <input
+            #searchBox
+            type="search"
+            (input)="updateSearch(searchBox.value)"
+            placeholder="Search by product name"
+            class="w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-600/20"
+          />
+        </label>
+      </div>
+
+      <!-- Loading -->
+      @if (isLoading()) {
+        <div
+          class="flex min-h-72 flex-col items-center justify-center gap-4 px-5"
+          aria-live="polite"
+        >
+          <div
+            class="h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-teal-700"
+          ></div>
+
+          <p class="text-sm text-slate-500">
+            Loading products...
+          </p>
+        </div>
+      }
+
+      <!-- No products -->
+      @else if (products().length === 0) {
+        <div
+          class="flex min-h-72 flex-col items-center justify-center px-5 text-center"
+        >
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-xl text-teal-700"
+          >
+            +
+          </div>
+
+          <h3
+            class="mt-4 font-semibold text-slate-950"
+          >
+            No products yet
+          </h3>
+
+          <p
+            class="mt-1 max-w-sm text-sm text-slate-500"
+          >
+            Add your first product to start managing inventory.
+          </p>
+
+          <button
+            type="button"
+            (click)="openCreateForm()"
+            class="mt-5 rounded-lg border border-teal-700 px-4 py-2 text-sm font-semibold text-teal-700 transition hover:bg-teal-50"
+          >
+            Add Product
+          </button>
+        </div>
+      }
+
+      <!-- No search results -->
+      @else if (filteredProducts().length === 0) {
+        <div
+          class="flex min-h-72 flex-col items-center justify-center px-5 text-center"
+        >
+          <h3 class="font-semibold text-slate-950">
+            No matching products
+          </h3>
+
+          <p class="mt-1 text-sm text-slate-500">
+            Try a different product name.
+          </p>
+        </div>
+      }
+
+      <!-- Table -->
+      @else {
+        <div class="overflow-x-auto">
+          <table
+            class="min-w-175 w-full text-left text-sm"
+          >
+            <thead
+              class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500"
+            >
+              <tr>
+                <th
+                  scope="col"
+                  class="px-5 py-3 font-semibold"
+                >
+                  ID
+                </th>
+
+                <th
+                  scope="col"
+                  class="px-5 py-3 font-semibold"
+                >
+                  Product Name
+                </th>
+
+                <th
+                  scope="col"
+                  class="px-5 py-3 font-semibold"
+                >
+                  Price
+                </th>
+
+                <th
+                  scope="col"
+                  class="px-5 py-3 font-semibold"
+                >
+                  Quantity
+                </th>
+
+                <th
+                  scope="col"
+                  class="px-5 py-3 text-right font-semibold"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody
+              class="divide-y divide-slate-100"
+            >
+              @for (
+                product of filteredProducts();
+                track product.id
+              ) {
+                <tr
+                  class="transition hover:bg-teal-50/40"
+                >
+                  <td
+                    class="whitespace-nowrap px-5 py-4 font-mono text-xs text-slate-500"
+                  >
+                    #{{ product.id }}
+                  </td>
+
+                  <td
+                    class="px-5 py-4 font-medium text-slate-950"
+                  >
+                    {{ product.name }}
+                  </td>
+
+                  <td
+                    class="whitespace-nowrap px-5 py-4 text-slate-600"
+                  >
+                    {{ product.price | currency }}
+                  </td>
+
+                  <td class="px-5 py-4">
+                    <span
+                      class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset"
+                      [class]="quantityClass(product.quantity)"
+                    >
+                      {{ product.quantity }} in stock
+                    </span>
+                  </td>
+
+                  <td
+                    class="whitespace-nowrap px-5 py-4 text-right"
+                  >
+                    <button
+                      type="button"
+                      (click)="openEditForm(product)"
+                      class="mr-3 font-semibold text-teal-700 transition hover:text-teal-900"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      (click)="deleteProduct(product)"
+                      [disabled]="deletingId() === product.id"
+                      class="font-semibold text-red-600 transition hover:text-red-800 disabled:cursor-wait disabled:opacity-50"
+                    >
+                      {{
+                        deletingId() === product.id
+                          ? 'Deleting...'
+                          : 'Delete'
+                      }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+</main>
+
+<!-- Product modal -->
+@if (isFormOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="product-form-title"
+  >
+    <section
+      class="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl"
+    >
+      <div class="flex items-start justify-between">
+        <div>
+          <p
+            class="text-sm font-semibold uppercase tracking-widest text-teal-700"
+          >
+            Catalogue
+          </p>
+
+          <h2
+            id="product-form-title"
+            class="mt-1 text-xl font-bold text-slate-950"
+          >
+            {{
+              editingProduct()
+                ? 'Edit product'
+                : 'Add product'
+            }}
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          (click)="closeForm()"
+          [disabled]="isSaving()"
+          aria-label="Close form"
+          class="text-2xl leading-none text-slate-400 transition hover:text-slate-700 disabled:opacity-50"
+        >
+          &times;
+        </button>
+      </div>
+
+      <form
+        [formGroup]="productForm"
+        (ngSubmit)="saveProduct()"
+        class="mt-6 space-y-4"
+      >
+
+        <!-- Name -->
+        <label class="block">
+          <span
+            class="text-sm font-medium text-slate-700"
+          >
+            Name
+          </span>
+
+          <input
+            formControlName="name"
+            maxlength="150"
+            class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+          />
+
+          @if (
+            productForm.controls.name.touched &&
+            productForm.controls.name.hasError('required')
+          ) {
+            <span
+              class="mt-1 block text-xs text-red-600"
+            >
+              Name is required.
+            </span>
+          }
+
+          @if (
+            productForm.controls.name.touched &&
+            productForm.controls.name.hasError('maxlength')
+          ) {
+            <span
+              class="mt-1 block text-xs text-red-600"
+            >
+              Name must be 150 characters or fewer.
+            </span>
+          }
+        </label>
+
+        <!-- Price / Quantity -->
+        <div
+          class="grid gap-4 sm:grid-cols-2"
+        >
+          <label class="block">
+            <span
+              class="text-sm font-medium text-slate-700"
+            >
+              Price
+            </span>
+
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="price"
+              class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+            />
+
+            @if (
+              productForm.controls.price.touched &&
+              productForm.controls.price.hasError('required')
+            ) {
+              <span
+                class="mt-1 block text-xs text-red-600"
+              >
+                Price is required.
+              </span>
+            }
+
+            @if (
+              productForm.controls.price.touched &&
+              productForm.controls.price.hasError('min')
+            ) {
+              <span
+                class="mt-1 block text-xs text-red-600"
+              >
+                Price cannot be negative.
+              </span>
+            }
+          </label>
+
+          <label class="block">
+            <span
+              class="text-sm font-medium text-slate-700"
+            >
+              Quantity
+            </span>
+
+            <input
+              type="number"
+              min="0"
+              step="1"
+              formControlName="quantity"
+              class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+            />
+
+            @if (
+              productForm.controls.quantity.touched &&
+              productForm.controls.quantity.hasError('required')
+            ) {
+              <span
+                class="mt-1 block text-xs text-red-600"
+              >
+                Quantity is required.
+              </span>
+            }
+
+            @if (
+              productForm.controls.quantity.touched &&
+              productForm.controls.quantity.hasError('min')
+            ) {
+              <span
+                class="mt-1 block text-xs text-red-600"
+              >
+                Quantity cannot be negative.
+              </span>
+            }
+          </label>
+        </div>
+
+        <!-- Form error -->
+        @if (feedbackMessage()) {
+          <p
+            class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+            role="alert"
+          >
+            {{ feedbackMessage() }}
+          </p>
+        }
+
+        <!-- Actions -->
+        <div
+          class="flex justify-end gap-3 border-t border-slate-100 pt-5"
+        >
+          <button
+            type="button"
+            (click)="closeForm()"
+            [disabled]="isSaving()"
+            class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            [disabled]="isSaving()"
+            class="rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{
+              isSaving()
+                ? 'Saving...'
+                : 'Save product'
+            }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}

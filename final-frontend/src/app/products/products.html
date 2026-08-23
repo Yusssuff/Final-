@@ -1,0 +1,410 @@
+<div class="min-h-screen bg-[#080b12] px-4 py-6 text-white sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div
+      class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
+    >
+      <div>
+        <p
+          class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-400"
+        >
+          SalesBuzz
+        </p>
+
+        <h1 class="mt-2 text-3xl font-semibold tracking-tight">Products</h1>
+
+        <p class="mt-2 text-sm text-slate-400">
+          Manage your products and inventory.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        (click)="openCreate()"
+        class="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-500"
+      >
+        <svg
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" d="M12 5v14"></path>
+
+          <path stroke-linecap="round" d="M5 12h14"></path>
+        </svg>
+
+        Add Product
+      </button>
+    </div>
+
+    <!-- Error -->
+    @if (errorMessage) {
+
+    <div class="mb-5 rounded-xl bg-red-500/10 px-4 py-3">
+      <div class="flex items-center justify-between gap-4">
+        <p class="text-sm text-red-300">{{ errorMessage }}</p>
+
+        <button
+          type="button"
+          (click)="errorMessage = ''"
+          class="text-xs text-red-400 hover:text-red-300"
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+
+    }
+
+    <!-- Success -->
+    @if (successMessage) {
+
+    <div class="mb-5 rounded-xl bg-emerald-500/10 px-4 py-3">
+      <div class="flex items-center justify-between gap-4">
+        <p class="text-sm text-emerald-300">{{ successMessage }}</p>
+
+        <button
+          type="button"
+          (click)="successMessage = ''"
+          class="text-xs text-emerald-400 hover:text-emerald-300"
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+
+    }
+
+    <!-- Search -->
+    <section class="mb-6 rounded-2xl bg-[#111620] p-4">
+      <label
+        for="productSearch"
+        class="mb-2 block text-sm font-medium text-slate-300"
+      >
+        Search products
+      </label>
+
+      <div class="relative">
+        <svg
+          class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+
+          <path stroke-linecap="round" d="M20 20l-4-4"></path>
+        </svg>
+
+        <input
+          id="productSearch"
+          type="text"
+          [(ngModel)]="searchValue"
+          placeholder="Search by name, description or ID..."
+          class="w-full rounded-xl bg-[#1a202c] py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none ring-1 ring-white/5 transition focus:ring-2 focus:ring-indigo-500/50"
+        />
+      </div>
+
+      <div class="mt-3 flex items-center justify-between">
+        <span class="text-xs text-slate-500"> Products from backend </span>
+
+        <span
+          class="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-400"
+        >
+          {{ filteredProducts.length }} products
+        </span>
+      </div>
+    </section>
+
+    <!-- Loading -->
+    @if (isLoading) {
+
+    <div
+      class="flex min-h-[300px] items-center justify-center rounded-2xl bg-[#111620]"
+    >
+      <div class="text-center">
+        <div
+          class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10"
+        >
+          <svg
+            class="h-6 w-6 animate-spin text-indigo-400"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="9"
+              stroke="currentColor"
+              stroke-width="2.5"
+              class="opacity-25"
+            ></circle>
+
+            <path
+              fill="currentColor"
+              d="M21 12a9 9 0 00-9-9v3a6 6 0 016 6h3z"
+            ></path>
+          </svg>
+        </div>
+
+        <p class="mt-4 text-sm text-slate-400">Loading products...</p>
+      </div>
+    </div>
+
+    } @else {
+
+    <!-- Product Table -->
+    <div class="overflow-hidden rounded-2xl bg-[#111620]">
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px] border-collapse">
+          <thead>
+            <tr class="border-b border-white/5 text-left">
+              <th
+                class="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
+              >
+                ID
+              </th>
+
+              <th
+                class="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
+              >
+                Product
+              </th>
+
+              <th
+                class="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
+              >
+                Description
+              </th>
+
+              <th
+                class="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
+              >
+                Price
+              </th>
+
+              <th
+                class="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
+              >
+                Quantity
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for ( product of filteredProducts; track product.id ) {
+
+            <tr
+              class="border-b border-white/5 transition hover:bg-white/[0.02]"
+            >
+              <td class="px-5 py-4 text-sm text-slate-500">
+                #{{ product.id }}
+              </td>
+
+              <td class="px-5 py-4">
+                <p class="text-sm font-semibold text-white">
+                  {{ product.name }}
+                </p>
+              </td>
+
+              <td class="px-5 py-4 text-sm text-slate-400">
+                {{ product.description || '—' }}
+              </td>
+
+              <td class="px-5 py-4 text-sm font-semibold text-white">
+                {{ product.price | number:'1.2-2' }}
+              </td>
+
+              <td class="px-5 py-4">
+                <span
+                  class="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-300"
+                >
+                  {{ product.quantity }}
+                </span>
+              </td>
+            </tr>
+
+            } @if ( filteredProducts.length === 0 ) {
+
+            <tr>
+              <td colspan="5" class="px-5 py-16 text-center">
+                <p class="text-sm font-medium text-slate-300">
+                  No products found
+                </p>
+
+                <p class="mt-1 text-xs text-slate-500">Try another search.</p>
+              </td>
+            </tr>
+
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    }
+  </div>
+
+  <!-- CREATE PRODUCT MODAL -->
+  @if (isModalOpen) {
+
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 px-4 py-8 backdrop-blur-sm"
+    (click)="closeModal()"
+  >
+    <div
+      class="w-full max-w-lg rounded-3xl bg-[#141923] p-6 shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-start justify-between">
+        <div>
+          <p
+            class="text-xs font-semibold uppercase tracking-[0.15em] text-indigo-400"
+          >
+            Products
+          </p>
+
+          <h2 class="mt-2 text-2xl font-semibold text-white">Add Product</h2>
+
+          <p class="mt-1 text-sm text-slate-500">
+            Create a product in the backend.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form class="mt-7" [formGroup]="productForm" (ngSubmit)="createProduct()">
+        <!-- Name -->
+        <div>
+          <label
+            for="productName"
+            class="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Product name
+          </label>
+
+          <input
+            id="productName"
+            type="text"
+            formControlName="name"
+            placeholder="Enter product name"
+            class="w-full rounded-xl bg-slate-800 px-4 py-3.5 text-sm text-white placeholder:text-slate-500 outline-none ring-1 ring-white/5 transition focus:ring-2 focus:ring-indigo-500/50"
+          />
+
+          @if ( productForm.controls.name.touched &&
+          productForm.controls.name.invalid ) {
+
+          <p class="mt-2 text-xs text-red-400">Product name is required.</p>
+
+          }
+        </div>
+
+        <!-- Description -->
+        <div class="mt-5">
+          <label
+            for="productDescription"
+            class="mb-2 block text-sm font-medium text-slate-300"
+          >
+            Description
+          </label>
+
+          <textarea
+            id="productDescription"
+            rows="4"
+            formControlName="description"
+            placeholder="Enter product description"
+            class="w-full resize-none rounded-xl bg-slate-800 px-4 py-3.5 text-sm text-white placeholder:text-slate-500 outline-none ring-1 ring-white/5 transition focus:ring-2 focus:ring-indigo-500/50"
+          ></textarea>
+        </div>
+
+        <!-- Price and quantity -->
+        <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label
+              for="productPrice"
+              class="mb-2 block text-sm font-medium text-slate-300"
+            >
+              Price
+            </label>
+
+            <input
+              id="productPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="price"
+              class="w-full rounded-xl bg-slate-800 px-4 py-3.5 text-sm text-white outline-none ring-1 ring-white/5 transition focus:ring-2 focus:ring-indigo-500/50"
+            />
+          </div>
+
+          <div>
+            <label
+              for="productQuantity"
+              class="mb-2 block text-sm font-medium text-slate-300"
+            >
+              Quantity
+            </label>
+
+            <input
+              id="productQuantity"
+              type="number"
+              min="0"
+              step="1"
+              formControlName="quantity"
+              class="w-full rounded-xl bg-slate-800 px-4 py-3.5 text-sm text-white outline-none ring-1 ring-white/5 transition focus:ring-2 focus:ring-indigo-500/50"
+            />
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-7 flex justify-end gap-3">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="rounded-xl bg-slate-800 px-5 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-700 hover:text-white"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            [disabled]="isSaving"
+            class="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            @if (isSaving) {
+
+            <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                stroke-width="2.5"
+                class="opacity-25"
+              ></circle>
+
+              <path
+                fill="currentColor"
+                d="M21 12a9 9 0 00-9-9v3a6 6 0 016 6h3z"
+              ></path>
+            </svg>
+
+            Creating... } @else { Create Product }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  }
+</div>

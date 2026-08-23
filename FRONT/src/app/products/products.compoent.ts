@@ -1,32 +1,15 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  Component,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import {
-  CreateProductRequest,
-  Product,
-  UpdateProductRequest,
-} from './products.model';
+import { CreateProductRequest, Product, UpdateProductRequest } from './products.model';
 import { ProductService } from './products.serv';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [
-    CurrencyPipe,
-    ReactiveFormsModule,
-  ],
+  imports: [CurrencyPipe, ReactiveFormsModule],
   templateUrl: './products.html',
   styleUrl: './products.scss',
 })
@@ -48,9 +31,7 @@ export class ProductsComponent implements OnInit {
   protected readonly editingProduct = signal<Product | null>(null);
 
   protected readonly filteredProducts = computed(() => {
-    const term = this.searchTerm()
-      .trim()
-      .toLowerCase();
+    const term = this.searchTerm().trim().toLowerCase();
 
     const products = this.products();
 
@@ -58,37 +39,14 @@ export class ProductsComponent implements OnInit {
       return products;
     }
 
-    return products.filter((product) =>
-      product.name
-        .toLowerCase()
-        .includes(term),
-    );
+    return products.filter((product) => product.name.toLowerCase().includes(term));
   });
 
-  protected readonly productForm =
-    this.formBuilder.nonNullable.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(150),
-        ],
-      ],
-      price: [
-        0,
-        [
-          Validators.required,
-          Validators.min(0),
-        ],
-      ],
-      quantity: [
-        0,
-        [
-          Validators.required,
-          Validators.min(0),
-        ],
-      ],
-    });
+  protected readonly productForm = this.formBuilder.nonNullable.group({
+    name: ['', [Validators.required, Validators.maxLength(150)]],
+    price: [0, [Validators.required, Validators.min(0)]],
+    quantity: [0, [Validators.required, Validators.min(0)]],
+  });
 
   ngOnInit(): void {
     this.loadProducts();
@@ -105,12 +63,7 @@ export class ProductsComponent implements OnInit {
       },
 
       error: (error: HttpErrorResponse) => {
-        this.errorMessage.set(
-          this.getErrorMessage(
-            error,
-            'Unable to load products.',
-          ),
-        );
+        this.errorMessage.set(this.getErrorMessage(error, 'Unable to load products.'));
 
         this.isLoading.set(false);
       },
@@ -139,9 +92,7 @@ export class ProductsComponent implements OnInit {
     this.isFormOpen.set(true);
   }
 
-  protected openEditForm(
-    product: Product,
-  ): void {
+  protected openEditForm(product: Product): void {
     this.editingProduct.set(product);
 
     this.productForm.setValue({
@@ -178,12 +129,9 @@ export class ProductsComponent implements OnInit {
       return;
     }
 
-    const value =
-      this.productForm.getRawValue();
+    const value = this.productForm.getRawValue();
 
-    const request:
-      | CreateProductRequest
-      | UpdateProductRequest = {
+    const request: CreateProductRequest | UpdateProductRequest = {
       name: value.name.trim(),
       price: value.price,
       quantity: value.quantity,
@@ -203,24 +151,18 @@ export class ProductsComponent implements OnInit {
     this.feedbackMessage.set('');
     this.errorMessage.set('');
 
-    const editingProduct =
-      this.editingProduct();
+    const editingProduct = this.editingProduct();
 
     if (editingProduct) {
       this.productService
-        .updateProduct(
-          editingProduct.id,
-          request as UpdateProductRequest,
-        )
+        .updateProduct(editingProduct.id, request as UpdateProductRequest)
         .subscribe({
           next: () => {
             this.isSaving.set(false);
             this.isFormOpen.set(false);
             this.editingProduct.set(null);
 
-            this.feedbackMessage.set(
-              'Product updated successfully.',
-            );
+            this.feedbackMessage.set('Product updated successfully.');
 
             this.loadProducts();
           },
@@ -228,58 +170,37 @@ export class ProductsComponent implements OnInit {
           error: (error: HttpErrorResponse) => {
             this.isSaving.set(false);
 
-            this.feedbackMessage.set(
-              this.getErrorMessage(
-                error,
-                'Unable to update the product.',
-              ),
-            );
+            this.feedbackMessage.set(this.getErrorMessage(error, 'Unable to update the product.'));
           },
         });
 
       return;
     }
 
-    this.productService
-      .createProduct(
-        request as CreateProductRequest,
-      )
-      .subscribe({
-        next: () => {
-          this.isSaving.set(false);
-          this.isFormOpen.set(false);
+    this.productService.createProduct(request as CreateProductRequest).subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.isFormOpen.set(false);
 
-          this.feedbackMessage.set(
-            'Product created successfully.',
-          );
+        this.feedbackMessage.set('Product created successfully.');
 
-          this.loadProducts();
-        },
+        this.loadProducts();
+      },
 
-        error: (error: HttpErrorResponse) => {
-          this.isSaving.set(false);
+      error: (error: HttpErrorResponse) => {
+        this.isSaving.set(false);
 
-          this.feedbackMessage.set(
-            this.getErrorMessage(
-              error,
-              'Unable to create the product.',
-            ),
-          );
-        },
-      });
+        this.feedbackMessage.set(this.getErrorMessage(error, 'Unable to create the product.'));
+      },
+    });
   }
 
-  protected deleteProduct(
-    product: Product,
-  ): void {
+  protected deleteProduct(product: Product): void {
     if (this.deletingId() !== null) {
       return;
     }
 
-    const confirmed =
-      window.confirm(
-        `Delete "${product.name}"?`,
-      );
+    const confirmed = window.confirm(`Delete "${product.name}"?`);
 
     if (!confirmed) {
       return;
@@ -289,35 +210,24 @@ export class ProductsComponent implements OnInit {
     this.feedbackMessage.set('');
     this.errorMessage.set('');
 
-    this.productService
-      .deleteProduct(product.id)
-      .subscribe({
-        next: () => {
-          this.deletingId.set(null);
+    this.productService.deleteProduct(product.id).subscribe({
+      next: () => {
+        this.deletingId.set(null);
 
-          this.feedbackMessage.set(
-            'Product deleted successfully.',
-          );
+        this.feedbackMessage.set('Product deleted successfully.');
 
-          this.loadProducts();
-        },
+        this.loadProducts();
+      },
 
-        error: (error: HttpErrorResponse) => {
-          this.deletingId.set(null);
+      error: (error: HttpErrorResponse) => {
+        this.deletingId.set(null);
 
-          this.feedbackMessage.set(
-            this.getErrorMessage(
-              error,
-              'Unable to delete the product.',
-            ),
-          );
-        },
-      });
+        this.feedbackMessage.set(this.getErrorMessage(error, 'Unable to delete the product.'));
+      },
+    });
   }
 
-  protected quantityClass(
-    quantity: number,
-  ): string {
+  protected quantityClass(quantity: number): string {
     if (quantity === 0) {
       return 'bg-red-50 text-red-700 ring-red-600/20';
     }
@@ -329,14 +239,8 @@ export class ProductsComponent implements OnInit {
     return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
   }
 
-  private getErrorMessage(
-    error: HttpErrorResponse,
-    fallback: string,
-  ): string {
-    const message =
-      typeof error.error?.message === 'string'
-        ? error.error.message
-        : '';
+  private getErrorMessage(error: HttpErrorResponse, fallback: string): string {
+    const message = typeof error.error?.message === 'string' ? error.error.message : '';
 
     if (message) {
       return message;
@@ -365,4 +269,3 @@ export class ProductsComponent implements OnInit {
     return fallback;
   }
 }
-

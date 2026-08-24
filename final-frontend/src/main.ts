@@ -1,11 +1,31 @@
-import { bootstrapApplication } from '@angular/platform-browser';
+import '@angular/localize/init';
+import {
+  platformBrowserDynamic
+} from '@angular/platform-browser-dynamic';
 
-import { AppComponent } from './app/app';
-import { appConfig } from './app/app.config';
+import {
+  AppModule
+} from './app/app.module';
 
-bootstrapApplication(
-  AppComponent,
-  appConfig
-).catch(error => {
-  console.error(error);
-});
+if (
+  typeof localStorage !== 'undefined' &&
+  !localStorage.getItem('lang')
+) {
+  localStorage.setItem('lang', 'en-US');
+}
+
+if (
+  typeof localStorage !== 'undefined' &&
+  !localStorage.getItem('isRightToLeft')
+) {
+  localStorage.setItem(
+    'isRightToLeft',
+    'ltr'
+  );
+}
+
+platformBrowserDynamic()
+  .bootstrapModule(AppModule)
+  .catch(error => {
+    console.error(error);
+  });

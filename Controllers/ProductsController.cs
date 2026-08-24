@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using SalesBuzz.Shared.Authorization;
-using SalesBuzz.Shared.Filters;
 
 namespace Final_Task.Controllers
 {
@@ -28,36 +27,38 @@ namespace Final_Task.Controllers
             _permissions = permissions;
         }
 
-        // =========================================
+        // =========================================================
         // GET ALL PRODUCTS
-        // =========================================
+        // =========================================================
 
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 OperationName,
-                PermissionKind.Read))
+                SalesBuzz.Shared.Filters.PermissionKind.Read))
             {
                 return Forbid();
             }
 
             var products =
-                await _db.Products.ToListAsync();
+                await _db.Products
+                    .ToListAsync();
 
             return Ok(products);
         }
 
-        // =========================================
+        // =========================================================
         // GET PRODUCT BY ID
-        // =========================================
+        // =========================================================
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetProduct(int id)
+        public async Task<IActionResult> GetProduct(
+            int id)
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 OperationName,
-                PermissionKind.Read))
+                SalesBuzz.Shared.Filters.PermissionKind.Read))
             {
                 return Forbid();
             }
@@ -69,24 +70,25 @@ namespace Final_Task.Controllers
             {
                 return NotFound(new
                 {
-                    message = "Product not found."
+                    message =
+                        "Product not found."
                 });
             }
 
             return Ok(product);
         }
 
-        // =========================================
+        // =========================================================
         // CREATE PRODUCT
-        // =========================================
+        // =========================================================
 
         [HttpPost]
         public async Task<IActionResult> CreateProduct(
             [FromBody] Product product)
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 OperationName,
-                PermissionKind.Create))
+                SalesBuzz.Shared.Filters.PermissionKind.Create))
             {
                 return Forbid();
             }
@@ -95,26 +97,53 @@ namespace Final_Task.Controllers
             {
                 return BadRequest(new
                 {
-                    message = "Product is required."
+                    message =
+                        "Product is required."
                 });
             }
 
-            if (string.IsNullOrWhiteSpace(product.Name))
+            if (string.IsNullOrWhiteSpace(
+                product.Name))
             {
                 return BadRequest(new
                 {
-                    message = "Product name is required."
+                    message =
+                        "Product name is required."
+                });
+            }
+
+            if (product.Price < 0)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Price cannot be negative."
+                });
+            }
+
+            if (product.Quantity < 0)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Quantity cannot be negative."
                 });
             }
 
             var newProduct = new Product
             {
-                Name = product.Name.Trim(),
-                Price = product.Price,
-                Quantity = product.Quantity
+                Name =
+                    product.Name.Trim(),
+
+                Price =
+                    product.Price,
+
+                Quantity =
+                    product.Quantity
             };
 
-            await _db.Products.AddAsync(newProduct);
+            await _db.Products.AddAsync(
+                newProduct);
 
             await _db.SaveChangesAsync();
 
@@ -124,22 +153,21 @@ namespace Final_Task.Controllers
                 {
                     id = newProduct.Id
                 },
-                newProduct
-            );
+                newProduct);
         }
 
-        // =========================================
+        // =========================================================
         // UPDATE PRODUCT
-        // =========================================
+        // =========================================================
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateProduct(
             int id,
             [FromBody] Product product)
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 OperationName,
-                PermissionKind.Update))
+                SalesBuzz.Shared.Filters.PermissionKind.Update))
             {
                 return Forbid();
             }
@@ -148,7 +176,36 @@ namespace Final_Task.Controllers
             {
                 return BadRequest(new
                 {
-                    message = "Product is required."
+                    message =
+                        "Product is required."
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                product.Name))
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Product name is required."
+                });
+            }
+
+            if (product.Price < 0)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Price cannot be negative."
+                });
+            }
+
+            if (product.Quantity < 0)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Quantity cannot be negative."
                 });
             }
 
@@ -159,13 +216,13 @@ namespace Final_Task.Controllers
             {
                 return NotFound(new
                 {
-                    message = "Product not found."
+                    message =
+                        "Product not found."
                 });
             }
 
             existingProduct.Name =
-                product.Name?.Trim()
-                ?? existingProduct.Name;
+                product.Name.Trim();
 
             existingProduct.Price =
                 product.Price;
@@ -178,17 +235,17 @@ namespace Final_Task.Controllers
             return Ok(existingProduct);
         }
 
-        // =========================================
+        // =========================================================
         // DELETE PRODUCT
-        // =========================================
+        // =========================================================
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteProduct(
             int id)
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 OperationName,
-                PermissionKind.Delete))
+                SalesBuzz.Shared.Filters.PermissionKind.Delete))
             {
                 return Forbid();
             }
@@ -200,11 +257,13 @@ namespace Final_Task.Controllers
             {
                 return NotFound(new
                 {
-                    message = "Product not found."
+                    message =
+                        "Product not found."
                 });
             }
 
-            _db.Products.Remove(existingProduct);
+            _db.Products.Remove(
+                existingProduct);
 
             await _db.SaveChangesAsync();
 
@@ -212,7 +271,7 @@ namespace Final_Task.Controllers
             {
                 message =
                     "Product deleted successfully.",
-                    
+
                 product =
                     existingProduct
             });

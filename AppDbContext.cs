@@ -1,80 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesBuzz.Shared.Data;
-using System.Data;
 
-namespace Final_Task.Data;
-
-public class AppDbContext : SalesBuzzDbContextBase
+namespace Final_Task.Data
 {
-    public AppDbContext(
-        DbContextOptions<AppDbContext> options,
-        ICurrentBUContext currentBUContext)
-        : base(options, currentBUContext)
+    public class AppDbContext : SalesBuzzDbContextBase
     {
-    }
-
-    public DbSet<Product> Products => Set<Product>();
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<User> Users => Set<User>();
-    public DbSet<Role> Roles => Set<Role>();
-    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<User>(entity =>
+        public AppDbContext(
+            DbContextOptions<AppDbContext> options,
+            ICurrentBUContext currentBUContext)
+            : base(options, currentBUContext)
         {
-            entity.HasKey(x => x.Id);
+        }
 
-            entity.Property(x => x.Username)
-                .IsRequired()
-                .HasMaxLength(100);
+        public DbSet<Product> Products => Set<Product>();
 
-            entity.HasIndex(x => x.Username)
-                .IsUnique();
+        public DbSet<Order> Orders => Set<Order>();
 
-            entity.Property(x => x.PasswordHash)
-                .IsRequired();
+        public DbSet<User> Users => Set<User>();
 
-            entity.HasOne(x => x.Role)
-                .WithMany(x => x.Users)
-                .HasForeignKey(x => x.RoleId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<Role>(entity =>
+        protected override void OnModelCreating(
+            ModelBuilder modelBuilder)
         {
-            entity.HasKey(x => x.Id);
+            base.OnModelCreating(modelBuilder);
 
-            entity.Property(x => x.Name)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            entity.HasIndex(x => x.Name)
-                .IsUnique();
-        });
-
-        modelBuilder.Entity<RolePermission>(entity =>
-        {
-            entity.HasKey(x => x.Id);
-
-            entity.Property(x => x.Operation)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            entity.HasOne(x => x.Role)
-                .WithMany(x => x.RolePermissions)
-                .HasForeignKey(x => x.RoleId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasIndex(x => new
+            modelBuilder.Entity<User>(entity =>
             {
-                x.RoleId,
-                x.Operation,
-                x.Permission
-            })
-            .IsUnique();
-        });
+                entity.HasKey(u => u.Id);
+
+                entity.Property(u => u.Username)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.HasIndex(u => u.Username)
+                    .IsUnique();
+
+                entity.Property(u => u.PasswordHash)
+                    .IsRequired();
+
+                entity.Property(u => u.Role)
+                    .IsRequired()
+                    .HasMaxLength(50);
+            });
+        }
     }
 }

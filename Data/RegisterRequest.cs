@@ -5,6 +5,7 @@ namespace Final_Task.Data
     public class RegisterRequest
     {
         [Required]
+        [MaxLength(100)]
         public string Username { get; set; } = string.Empty;
 
         [Required]

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using SalesBuzz.Shared.Authorization;
 using SalesBuzz.Shared.Data;
 using SalesBuzz.Shared.Middleware;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,14 @@ builder.Services.AddSalesBuzzDb<AppDbContext>(
 
 builder.Services.AddSalesBuzzJwt(
     builder.Configuration
+);
+
+// Ensure AppDbContext is configured with the application's connection string
+// so EF / direct DB connections (e.g. _db.Database.GetDbConnection()) have a valid ConnectionString.
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
 );
 
 // ASP.NET authorization

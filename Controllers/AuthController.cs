@@ -596,55 +596,112 @@ namespace Final_Task.Controllers
                         return null;
                     }
 
-                    await using var connection =
-                        _db.Database.GetDbConnection();
+                    // Try to use the DbContext's connection first. Some SDK registrations
+                    // may not configure the connection string on the context's underlying
+                    // DbConnection, so fall back to creating a SqlConnection from
+                    // configuration when necessary.
+                    var dbConnection = _db.Database.GetDbConnection();
+                    var useExplicitSqlConnection = string.IsNullOrWhiteSpace(dbConnection.ConnectionString);
 
-                    if (connection.State != ConnectionState.Open)
+                    if (!useExplicitSqlConnection)
                     {
+                        // Use the DbContext's connection (do not dispose it here — DbContext owns it)
+                        var connection = dbConnection;
+
+                        if (connection.State != ConnectionState.Open)
+                        {
+                            await connection.OpenAsync();
+                        }
+
+                        await using var command = connection.CreateCommand();
+
+                        command.CommandText = @"
+                            SELECT TOP 1 BUID
+                            FROM dbo.HH_SA_UserBUPermissions
+                            WHERE LOWER(UserID) = LOWER(@user)
+                            ";
+
+                        var param = command.CreateParameter();
+                        param.ParameterName = "@user";
+                        param.Value = username.Trim();
+                        command.Parameters.Add(param);
+
+                        await using var reader = await command.ExecuteReaderAsync();
+
+                        if (await reader.ReadAsync())
+                        {
+                            return reader.IsDBNull(0) ? null : reader.GetString(0).Trim();
+                        }
+
+                        // Fallback: pick a default BU from HH_SA_BU
+                        reader.Dispose();
+                        command.Parameters.Clear();
+
+                        command.CommandText = @"
+                            SELECT TOP 1 BUID
+                            FROM dbo.HH_SA_BU
+                            ORDER BY BUID
+                            ";
+
+                        await using var reader2 = await command.ExecuteReaderAsync();
+
+                        if (await reader2.ReadAsync())
+                        {
+                            return reader2.IsDBNull(0) ? null : reader2.GetString(0).Trim();
+                        }
+
+                        return null;
+                    }
+                    else
+                    {
+                        var connStr = _configuration.GetConnectionString("DefaultConnection");
+
+                        if (string.IsNullOrWhiteSpace(connStr))
+                        {
+                            // No connection string available to create a fallback connection.
+                            return null;
+                        }
+
+                        await using var connection = new SqlConnection(connStr);
                         await connection.OpenAsync();
+
+                        await using var command = connection.CreateCommand();
+
+                        command.CommandText = @"
+                            SELECT TOP 1 BUID
+                            FROM dbo.HH_SA_UserBUPermissions
+                            WHERE LOWER(UserID) = LOWER(@user)
+                            ";
+
+                        var param = command.CreateParameter();
+                        param.ParameterName = "@user";
+                        param.Value = username.Trim();
+                        command.Parameters.Add(param);
+
+                        await using var reader = await command.ExecuteReaderAsync();
+
+                        if (await reader.ReadAsync())
+                        {
+                            return reader.IsDBNull(0) ? null : reader.GetString(0).Trim();
+                        }
+
+                        // Fallback: pick a default BU from HH_SA_BU
+                        command.Parameters.Clear();
+                        command.CommandText = @"
+                            SELECT TOP 1 BUID
+                            FROM dbo.HH_SA_BU
+                            ORDER BY BUID
+                            ";
+
+                        await using var reader2 = await command.ExecuteReaderAsync();
+
+                        if (await reader2.ReadAsync())
+                        {
+                            return reader2.IsDBNull(0) ? null : reader2.GetString(0).Trim();
+                        }
+
+                        return null;
                     }
-
-                    await using var command =
-                        connection.CreateCommand();
-
-                    command.CommandText = @"
-                        SELECT TOP 1 BUID
-                        FROM dbo.HH_SA_UserBUPermissions
-                        WHERE LOWER(UserID) = LOWER(@user)
-                        ";
-
-                    var param = command.CreateParameter();
-                    param.ParameterName = "@user";
-                    param.Value = username.Trim();
-                    command.Parameters.Add(param);
-
-                    await using var reader =
-                        await command.ExecuteReaderAsync();
-
-                    if (await reader.ReadAsync())
-                    {
-                        return reader.IsDBNull(0) ? null : reader.GetString(0).Trim();
-                    }
-
-                    // Fallback: pick a default BU from HH_SA_BU
-                    reader.Dispose();
-                    command.Parameters.Clear();
-
-                    command.CommandText = @"
-                        SELECT TOP 1 BUID
-                        FROM dbo.HH_SA_BU
-                        ORDER BY BUID
-                        ";
-
-                    await using var reader2 =
-                        await command.ExecuteReaderAsync();
-
-                    if (await reader2.ReadAsync())
-                    {
-                        return reader2.IsDBNull(0) ? null : reader2.GetString(0).Trim();
-                    }
-
-                    return null;
                 }
     }
 

@@ -1,90 +1,57 @@
-﻿using Final_Task.Data;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-
-using SalesBuzz.Shared.Authorization;
+﻿using SalesBuzz.Shared.Authorization;
 using SalesBuzz.Shared.Filters;
-using System.Security.Claims;
 
-namespace Final_Task.Services;
-
-public sealed class SalesBuzzPermissionService
+namespace Final_Task.Services
 {
-    private readonly AppDbContext _db;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public SalesBuzzPermissionService(
-        AppDbContext db,
-        IHttpContextAccessor httpContextAccessor)
+    public sealed class SalesBuzzPermissionService
     {
-        _db = db;
-        _httpContextAccessor = httpContextAccessor;
-    }
+        private readonly IPermissions _permissions;
 
-    private int? CurrentUserId()
-    {
-        var user =
-            _httpContextAccessor
-                .HttpContext?
-                .User;
-
-        if (user?.Identity?.IsAuthenticated != true)
+        public SalesBuzzPermissionService(
+            IPermissions permissions)
         {
-            return null;
+            _permissions = permissions;
         }
 
-        var userId =
-            user.FindFirstValue(
-                ClaimTypes.NameIdentifier
-            );
-
-        if (!int.TryParse(
-            userId,
-            out var id))
+        public bool HasPermission(
+            string operation,
+            PermissionKind permission)
         {
-            return null;
+            if (string.IsNullOrWhiteSpace(operation))
+            {
+                return false;
+            }
+
+            return _permissions.IsValidOperationPermission(
+                operation,
+                permission);
         }
 
-        return id;
-    }
-
-    public async Task<bool> HasPermission(
-        string operation,
-        PermissionKind permission)
-    {
-        if (string.IsNullOrWhiteSpace(operation))
+        public bool HasExplicitPermission(
+            string operation,
+            PermissionKind permission)
         {
-            return false;
+            if (string.IsNullOrWhiteSpace(operation))
+            {
+                return false;
+            }
+
+            return _permissions.IsValidOperationPermission(
+                operation,
+                permission,
+                explicitly: true);
         }
 
-        var userId =
-            CurrentUserId();
-
-        if (!userId.HasValue)
+        public void RefreshRolePermissions(
+            string roleId)
         {
-            return false;
+            if (string.IsNullOrWhiteSpace(roleId))
+            {
+                return;
+            }
+
+            _permissions.UpdateUserPermissions(
+                roleId.Trim());
         }
-
-        return await _db.RolePermissions
-            .AnyAsync(
-                rp =>
-                    rp.Role != null &&
-                    rp.Role.Users.Any(
-                        u => u.Id == userId.Value
-                    ) &&
-                    rp.Operation == operation &&
-                    rp.Permission == permission
-            );
-    }
-
-    public async Task<bool> HasExplicitPermission(
-        string operation,
-        PermissionKind permission)
-    {
-        return await HasPermission(
-            operation,
-            permission
-        );
     }
 }

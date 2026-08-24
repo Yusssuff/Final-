@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using SalesBuzz.Shared.Authorization;
-using SalesBuzz.Shared.Filters;
 
 using System.Security.Claims;
 
@@ -28,55 +27,63 @@ namespace Final_Task.Controllers
             _permissions = permissions;
         }
 
-        // =========================================
+        // =========================================================
         // GET ALL ORDERS
-        // =========================================
+        // =========================================================
 
         [HttpGet]
         public async Task<IActionResult> GetOrders()
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 "Orders",
-                PermissionKind.Read))
+                SalesBuzz.Shared.Filters.PermissionKind.Read))
             {
                 return Forbid();
             }
 
-            var orders = await _db.Orders
-                .Include(o => o.Product)
-                .ToListAsync();
+            var orders =
+                await _db.Orders
+                    .Include(o => o.Product)
+                    .ToListAsync();
 
             return Ok(orders);
         }
 
-        // =========================================
+        // =========================================================
         // CREATE ORDER
-        // =========================================
+        // =========================================================
 
         [HttpPost]
         public async Task<IActionResult> CreateOrder(
             [FromBody] CreateOrderRequest request)
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 "Orders",
-                PermissionKind.Create))
+                SalesBuzz.Shared.Filters.PermissionKind.Create))
             {
                 return Forbid();
             }
 
             if (request == null)
             {
-                return BadRequest(
-                    "Order data is required.");
+                return BadRequest(new
+                {
+                    message = "Order data is required."
+                });
             }
 
             if (request.Quantity <= 0)
             {
-                return BadRequest(
-                    "Quantity must be greater than zero.");
+                return BadRequest(new
+                {
+                    message =
+                        "Quantity must be greater than zero."
+                });
             }
 
-            // Get authenticated user ID from JWT.
+            // Get the authenticated user's ID
+            // directly from the JWT.
+
             var userIdClaim =
                 User.FindFirstValue(
                     ClaimTypes.NameIdentifier);
@@ -85,7 +92,11 @@ namespace Final_Task.Controllers
                 userIdClaim,
                 out var userId))
             {
-                return Unauthorized();
+                return Unauthorized(new
+                {
+                    message =
+                        "User identity is invalid."
+                });
             }
 
             var product =
@@ -94,45 +105,66 @@ namespace Final_Task.Controllers
 
             if (product == null)
             {
-                return NotFound(
-                    "Product not found.");
+                return NotFound(new
+                {
+                    message =
+                        "Product not found."
+                });
             }
 
-            if (request.Quantity > product.Quantity)
+            if (request.Quantity >
+                product.Quantity)
             {
-                return BadRequest(
-                    $"Not enough stock. Available quantity: {product.Quantity}.");
+                return BadRequest(new
+                {
+                    message =
+                        $"Not enough stock. Available quantity: {product.Quantity}."
+                });
             }
 
             var order = new Order
             {
-                UserId = userId,
-                ProductId = product.Id,
-                Quantity = request.Quantity,
+                UserId =
+                    userId,
+
+                ProductId =
+                    product.Id,
+
+                Quantity =
+                    request.Quantity,
+
                 TotalPrice =
-                    product.Price * request.Quantity,
-                OrderDate = DateTime.UtcNow,
-                Product = product
+                    product.Price *
+                    request.Quantity,
+
+                OrderDate =
+                    DateTime.UtcNow,
+
+                Product =
+                    product
             };
 
-            product.Quantity -= request.Quantity;
+            product.Quantity -=
+                request.Quantity;
 
             await _db.Orders.AddAsync(order);
+
             await _db.SaveChangesAsync();
 
             return Ok(order);
         }
 
-        // =========================================
+        // =========================================================
         // GET ORDER BY ID
-        // =========================================
+        // =========================================================
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetOrder(int id)
+        public async Task<IActionResult> GetOrder(
+            int id)
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 "Orders",
-                PermissionKind.Read))
+                SalesBuzz.Shared.Filters.PermissionKind.Read))
             {
                 return Forbid();
             }
@@ -145,39 +177,48 @@ namespace Final_Task.Controllers
 
             if (order == null)
             {
-                return NotFound(
-                    "Order not found.");
+                return NotFound(new
+                {
+                    message =
+                        "Order not found."
+                });
             }
 
             return Ok(order);
         }
 
-        // =========================================
+        // =========================================================
         // UPDATE ORDER
-        // =========================================
+        // =========================================================
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateOrder(
             int id,
             [FromBody] CreateOrderRequest request)
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 "Orders",
-                PermissionKind.Update))
+                SalesBuzz.Shared.Filters.PermissionKind.Update))
             {
                 return Forbid();
             }
 
             if (request == null)
             {
-                return BadRequest(
-                    "Order data is required.");
+                return BadRequest(new
+                {
+                    message =
+                        "Order data is required."
+                });
             }
 
             if (request.Quantity <= 0)
             {
-                return BadRequest(
-                    "Quantity must be greater than zero.");
+                return BadRequest(new
+                {
+                    message =
+                        "Quantity must be greater than zero."
+                });
             }
 
             var existingOrder =
@@ -188,32 +229,46 @@ namespace Final_Task.Controllers
 
             if (existingOrder == null)
             {
-                return NotFound(
-                    "Order not found.");
+                return NotFound(new
+                {
+                    message =
+                        "Order not found."
+                });
             }
 
             var newProduct =
                 await _db.Products
                     .FirstOrDefaultAsync(
-                        p => p.Id == request.ProductId);
+                        p =>
+                            p.Id ==
+                            request.ProductId);
 
             if (newProduct == null)
             {
-                return NotFound(
-                    "Product not found.");
+                return NotFound(new
+                {
+                    message =
+                        "Product not found."
+                });
             }
 
-            // Return old quantity to stock.
+            // Return the previous quantity
+            // to the old product's stock.
+
             if (existingOrder.Product != null)
             {
                 existingOrder.Product.Quantity +=
                     existingOrder.Quantity;
             }
 
-            if (request.Quantity > newProduct.Quantity)
+            if (request.Quantity >
+                newProduct.Quantity)
             {
-                return BadRequest(
-                    $"Not enough stock. Available quantity: {newProduct.Quantity}.");
+                return BadRequest(new
+                {
+                    message =
+                        $"Not enough stock. Available quantity: {newProduct.Quantity}."
+                });
             }
 
             var userIdClaim =
@@ -224,10 +279,15 @@ namespace Final_Task.Controllers
                 userIdClaim,
                 out var userId))
             {
-                return Unauthorized();
+                return Unauthorized(new
+                {
+                    message =
+                        "User identity is invalid."
+                });
             }
 
-            existingOrder.UserId = userId;
+            existingOrder.UserId =
+                userId;
 
             existingOrder.ProductId =
                 newProduct.Id;
@@ -253,16 +313,17 @@ namespace Final_Task.Controllers
             return Ok(existingOrder);
         }
 
-        // =========================================
+        // =========================================================
         // DELETE ORDER
-        // =========================================
+        // =========================================================
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteOrder(int id)
+        public async Task<IActionResult> DeleteOrder(
+            int id)
         {
-            if (!await _permissions.HasPermission(
+            if (!_permissions.HasPermission(
                 "Orders",
-                PermissionKind.Delete))
+                SalesBuzz.Shared.Filters.PermissionKind.Delete))
             {
                 return Forbid();
             }
@@ -275,11 +336,16 @@ namespace Final_Task.Controllers
 
             if (existingOrder == null)
             {
-                return NotFound(
-                    "Order not found.");
+                return NotFound(new
+                {
+                    message =
+                        "Order not found."
+                });
             }
 
-            // Return ordered quantity to stock.
+            // Return the ordered quantity
+            // to product stock.
+
             if (existingOrder.Product != null)
             {
                 existingOrder.Product.Quantity +=

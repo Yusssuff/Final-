@@ -1,1 +1,16 @@
+<header class="flex items-center justify-between p-4 bg-[#0b1220] text-white">
+  <div class="flex items-center gap-3">
+    <a routerLink="/products" class="text-lg font-semibold">SalesBuzz</a>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <a *ngIf="!isLoggedIn" routerLink="/auth" class="text-sm">Sign in</a>
+
+    <div *ngIf="isLoggedIn" class="flex items-center gap-3">
+      <span class="text-sm">{{ username }}</span>
+      <button (click)="logout()" class="rounded px-3 py-1 bg-indigo-600 text-white text-sm">Logout</button>
+    </div>
+  </div>
+</header>
+
 <router-outlet></router-outlet>

@@ -38,6 +38,33 @@
         Refresh
       </button>
 
+      <button
+        *ngIf="isAdmin"
+        type="button"
+        (click)="addProductPrompt()"
+        class="rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-green-500"
+      >
+        Add Product
+      </button>
+
+      <button
+        *ngIf="isAdmin"
+        type="button"
+        (click)="editProductPrompt()"
+        class="rounded-xl bg-yellow-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-yellow-500"
+      >
+        Edit Product
+      </button>
+
+      <button
+        *ngIf="isAdmin"
+        type="button"
+        (click)="deleteProductPrompt()"
+        class="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-500"
+      >
+        Delete Product
+      </button>
+
     </div>
 
     <!-- Search -->

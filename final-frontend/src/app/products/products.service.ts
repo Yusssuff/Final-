@@ -104,4 +104,26 @@ export class ProductsService {
       }
     );
   }
+
+  // -----------------------------------------
+  // UPDATE PRODUCT
+  // -----------------------------------------
+  updateProduct(
+    id: number,
+    request: CreateProductRequest
+  ): Observable<Product> {
+    return this.http.put<Product>(
+      `${this.baseUrl}/${id}`,
+      request
+    );
+  }
+
+  // -----------------------------------------
+  // DELETE PRODUCT
+  // -----------------------------------------
+  deleteProduct(id: number): Observable<any> {
+    return this.http.delete(
+      `${this.baseUrl}/${id}`
+    );
+  }
 }

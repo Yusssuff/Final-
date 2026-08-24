@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+﻿import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, catchError, of, tap } from 'rxjs';
 
 import {
   AuthUser,
@@ -23,12 +23,26 @@ export class AuthService {
 
   private readonly userKey = 'salesbuzz_user';
 
+  private readonly _currentUser = new BehaviorSubject<AuthUser | null>(
+    this._readUserFromStorage(),
+  );
+
+  public currentUser$ = this._currentUser.asObservable();
+
+  constructor() {
+    if (this.getToken()) {
+      this.refreshCurrentUser().subscribe();
+    }
+  }
+
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/login`, request).pipe(
       tap((response) => {
         localStorage.setItem(this.tokenKey, response.token);
 
         localStorage.setItem(this.userKey, JSON.stringify(response.user));
+
+        this._currentUser.next(response.user);
       }),
     );
   }
@@ -43,26 +57,63 @@ export class AuthService {
   me(): Observable<MeResponse> {
     const token = this.getToken();
 
-    return this.http.get<MeResponse>(`${this.baseUrl}/me`, {
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {},
-    });
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
+
+    return this.http.get<MeResponse>(`${this.baseUrl}/me`, { headers });
+  }
+
+  /**
+   * Refresh the current user from the server and update local storage + observable.
+   */
+  refreshCurrentUser(): Observable<MeResponse | null> {
+    if (!this.getToken()) {
+      this._currentUser.next(null);
+      return of(null);
+    }
+
+    return this.me().pipe(
+      tap((me) => {
+        if (me && me.username) {
+          const user: AuthUser = {
+            id: parseInt(me.userId || '0', 10) || 0,
+            username: me.username,
+            role: me.role || 'User',
+          };
+
+          localStorage.setItem(this.userKey, JSON.stringify(user));
+          this._currentUser.next(user);
+        } else {
+          // Clear if server reports unauthenticated
+          localStorage.removeItem(this.tokenKey);
+          localStorage.removeItem(this.userKey);
+          this._currentUser.next(null);
+        }
+      }),
+      catchError((_) => {
+        // On error, don't throw to consumers; clear auth state
+        localStorage.removeItem(this.tokenKey);
+        localStorage.removeItem(this.userKey);
+        this._currentUser.next(null);
+        return of(null);
+      }),
+    );
   }
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
 
     localStorage.removeItem(this.userKey);
+
+    this._currentUser.next(null);
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
 
-  getUser(): AuthUser | null {
+  private _readUserFromStorage(): AuthUser | null {
     const value = localStorage.getItem(this.userKey);
 
     if (!value) {
@@ -76,6 +127,10 @@ export class AuthService {
 
       return null;
     }
+  }
+
+  getUser(): AuthUser | null {
+    return this._currentUser.value;
   }
 
   isLoggedIn(): boolean {

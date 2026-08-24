@@ -56,12 +56,7 @@ export class ProductsDataSource
     },
   ];
 
-  /*
-   * IMPORTANT:
-   *
-   * This is a REST (non-OData) datasource.
-   * BI-Grid expects IDataSource.Type to be 'api' for REST endpoints.
-   */
+
   Type = 'api' as IDataSource['Type'];
 
   IsClientSideFilter = true;

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Data;
 
 namespace Final_Task.Data
 {
@@ -14,8 +15,10 @@ namespace Final_Task.Data
         [Required]
         public string PasswordHash { get; set; } = string.Empty;
 
+
         [Required]
-        [MaxLength(20)]
-        public string Role { get; set; } = "User";
+        public int RoleId { get; set; }
+
+        public Role? Role { get; set; }
     }
 }

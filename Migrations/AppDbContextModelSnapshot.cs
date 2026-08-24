@@ -49,7 +49,7 @@ namespace Final_Task.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Final_Task.Data.Product", b =>
@@ -73,7 +73,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Final_Task.Data.User", b =>
@@ -103,7 +103,7 @@ namespace Final_Task.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Data.Auditing.AuditCriteria", b =>
@@ -117,7 +117,7 @@ namespace Final_Task.Migrations
                     b.Property<string>("TableName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("AuditCriteria");
+                    b.ToTable("AuditCriteria", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.BS_Periods", b =>
@@ -175,7 +175,7 @@ namespace Final_Task.Migrations
                     b.HasIndex(new[] { "PeriodKey" }, "UQ__BS_Periods__565DD247")
                         .IsUnique();
 
-                    b.ToTable("BS_Periods");
+                    b.ToTable("BS_Periods", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.BS_Years", b =>
@@ -219,7 +219,7 @@ namespace Final_Task.Migrations
                     b.HasKey("YearId")
                         .HasName("PK_Years");
 
-                    b.ToTable("BS_Years");
+                    b.ToTable("BS_Years", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_AR_SalesmenCats", b =>
@@ -256,7 +256,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("CategoryId");
 
-                    b.ToTable("HH_AR_SalesmenCats");
+                    b.ToTable("HH_AR_SalesmenCats", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_AR_SalesmenPcts", b =>
@@ -844,7 +844,7 @@ namespace Final_Task.Migrations
 
                     b.HasIndex(new[] { "LocationNo" }, "idx_HH_CustomerLocations_LocationNo");
 
-                    b.ToTable("HH_CustomerLocations", t =>
+                    b.ToTable("HH_CustomerLocations", null, t =>
                         {
                             t.HasTrigger("hh_customerLocations_InactiveDate_InsertTrigger");
 
@@ -870,7 +870,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("TableName");
 
-                    b.ToTable("HH_EntityBUControl");
+                    b.ToTable("HH_EntityBUControl", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_IC_UOMDetail", b =>
@@ -1191,7 +1191,7 @@ namespace Final_Task.Migrations
 
                     b.HasIndex(new[] { "ItemNo" }, "idx_hh_itemUoms_ItemNo");
 
-                    b.ToTable("HH_ItemUoms");
+                    b.ToTable("HH_ItemUoms", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_Messages", b =>
@@ -1259,7 +1259,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("MessageID");
 
-                    b.ToTable("HH_Messages", t =>
+                    b.ToTable("HH_Messages", null, t =>
                         {
                             t.HasTrigger("HH_Messages_delete_trigger");
 
@@ -1311,7 +1311,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("PARAM_ID");
 
-                    b.ToTable("HH_PARAMS");
+                    b.ToTable("HH_PARAMS", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_PARAMS_BU", b =>
@@ -1460,7 +1460,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("BUID");
 
-                    b.ToTable("HH_SA_BU");
+                    b.ToTable("HH_SA_BU", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_SA_Role", b =>
@@ -1491,7 +1491,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("RoleID");
 
-                    b.ToTable("HH_SA_Roles");
+                    b.ToTable("HH_SA_Roles", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_SA_RolePermission", b =>
@@ -1555,7 +1555,7 @@ namespace Final_Task.Migrations
                     b.HasKey("RoleID", "KeyID")
                         .HasName("PK__HH_SA_RolePermis__341D6548");
 
-                    b.ToTable("HH_SA_RolePermissions");
+                    b.ToTable("HH_SA_RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_SA_SecurityKey", b =>
@@ -1614,7 +1614,7 @@ namespace Final_Task.Migrations
                     b.HasKey("KeyID")
                         .HasName("PK__HH_SA_SecurityKe__35118981");
 
-                    b.ToTable("HH_SA_SecurityKeys");
+                    b.ToTable("HH_SA_SecurityKeys", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_SA_UserBUPermissions", b =>
@@ -1646,7 +1646,7 @@ namespace Final_Task.Migrations
                     b.HasKey("UserID", "BUID")
                         .HasName("PK__HH_SA_UserBUPerm__1FF7A424");
 
-                    b.ToTable("HH_SA_UserBUPermissions");
+                    b.ToTable("HH_SA_UserBUPermissions", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.HH_Salesman", b =>
@@ -2046,7 +2046,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("SalesmanNo");
 
-                    b.ToTable("HH_Salesman");
+                    b.ToTable("HH_Salesman", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.SA_AuditLog", b =>
@@ -2080,7 +2080,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("Serial");
 
-                    b.ToTable("SA_AuditLogs");
+                    b.ToTable("SA_AuditLogs", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.SA_License", b =>
@@ -2100,7 +2100,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SA_License");
+                    b.ToTable("SA_License", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.SA_Session", b =>
@@ -2133,7 +2133,7 @@ namespace Final_Task.Migrations
                     b.HasKey("JTI")
                         .HasName("PK__SA_Sessi__C4D18800571AE969");
 
-                    b.ToTable("SA_Sessions");
+                    b.ToTable("SA_Sessions", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.ST_EventDefinition", b =>
@@ -2412,7 +2412,7 @@ namespace Final_Task.Migrations
                     b.HasKey("NumberSequanceID", "CanceledSerial")
                         .HasName("PK__hh_ST_NumberSequ__4AE20229");
 
-                    b.ToTable("hh_ST_NumberSequanceCanceledSerials");
+                    b.ToTable("hh_ST_NumberSequanceCanceledSerials", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.hh_ST_NumberSequanceCanceledSerialsBU", b =>
@@ -2540,7 +2540,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("hh_Target");
+                    b.ToTable("hh_Target", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Entities.loginusers", b =>
@@ -2638,7 +2638,7 @@ namespace Final_Task.Migrations
 
                     b.HasKey("userName");
 
-                    b.ToTable("loginusers");
+                    b.ToTable("loginusers", (string)null);
                 });
 
             modelBuilder.Entity("SalesBuzz.Shared.Models.RecordLevelSecurity", b =>

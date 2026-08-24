@@ -1,6 +1,10 @@
 ﻿using Final_Task.Data;
+using Final_Task.Services;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 using SalesBuzz.Shared.Authorization;
 using SalesBuzz.Shared.Filters;
 
@@ -11,7 +15,6 @@ namespace Final_Task.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-       
         private const string OperationName = "Products";
 
         private readonly AppDbContext _db;
@@ -25,20 +28,36 @@ namespace Final_Task.Controllers
             _permissions = permissions;
         }
 
-        [HttpGet]
-        public IActionResult GetProducts()
-        {
-          
+        // =========================================
+        // GET ALL PRODUCTS
+        // =========================================
 
-            return Ok(_db.Products);
+        [HttpGet]
+        public async Task<IActionResult> GetProducts()
+        {
+            if (!await _permissions.HasPermission(
+                OperationName,
+                PermissionKind.Read))
+            {
+                return Forbid();
+            }
+
+            var products =
+                await _db.Products.ToListAsync();
+
+            return Ok(products);
         }
+
+        // =========================================
+        // GET PRODUCT BY ID
+        // =========================================
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetProduct(int id)
         {
-            if (!_permissions.HasPermission(
-                    OperationName,
-                    PermissionKind.Read))
+            if (!await _permissions.HasPermission(
+                OperationName,
+                PermissionKind.Read))
             {
                 return Forbid();
             }
@@ -57,14 +76,17 @@ namespace Final_Task.Controllers
             return Ok(product);
         }
 
+        // =========================================
+        // CREATE PRODUCT
+        // =========================================
 
         [HttpPost]
         public async Task<IActionResult> CreateProduct(
             [FromBody] Product product)
         {
-            if (!_permissions.HasPermission(
-                    OperationName,
-                    PermissionKind.Create))
+            if (!await _permissions.HasPermission(
+                OperationName,
+                PermissionKind.Create))
             {
                 return Forbid();
             }
@@ -93,6 +115,7 @@ namespace Final_Task.Controllers
             };
 
             await _db.Products.AddAsync(newProduct);
+
             await _db.SaveChangesAsync();
 
             return CreatedAtAction(
@@ -105,15 +128,18 @@ namespace Final_Task.Controllers
             );
         }
 
+        // =========================================
+        // UPDATE PRODUCT
+        // =========================================
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateProduct(
             int id,
             [FromBody] Product product)
         {
-            if (!_permissions.HasPermission(
-                    OperationName,
-                    PermissionKind.Update))
+            if (!await _permissions.HasPermission(
+                OperationName,
+                PermissionKind.Update))
             {
                 return Forbid();
             }
@@ -138,8 +164,8 @@ namespace Final_Task.Controllers
             }
 
             existingProduct.Name =
-                product.Name?.Trim() ??
-                existingProduct.Name;
+                product.Name?.Trim()
+                ?? existingProduct.Name;
 
             existingProduct.Price =
                 product.Price;
@@ -152,13 +178,17 @@ namespace Final_Task.Controllers
             return Ok(existingProduct);
         }
 
+        // =========================================
+        // DELETE PRODUCT
+        // =========================================
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProduct(
+            int id)
         {
-            if (!_permissions.HasPermission(
-                    OperationName,
-                    PermissionKind.Delete))
+            if (!await _permissions.HasPermission(
+                OperationName,
+                PermissionKind.Delete))
             {
                 return Forbid();
             }
@@ -180,8 +210,11 @@ namespace Final_Task.Controllers
 
             return Ok(new
             {
-                message = "Product deleted successfully.",
-                product = existingProduct
+                message =
+                    "Product deleted successfully.",
+                    
+                product =
+                    existingProduct
             });
         }
     }

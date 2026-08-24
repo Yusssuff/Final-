@@ -1,11 +1,14 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 using Final_Task.Data;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.IdentityModel.Tokens;
 
 namespace Final_Task.Controllers
@@ -15,56 +18,63 @@ namespace Final_Task.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _db;
-        private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly SalesBuzzPermissionService _permissions;
-        private readonly IConfiguration _configuration;
+
+        private readonly IPasswordHasher<User>
+            _passwordHasher;
+
+        private readonly IConfiguration
+            _configuration;
 
         public AuthController(
             AppDbContext db,
             IPasswordHasher<User> passwordHasher,
-            SalesBuzzPermissionService permissions,
             IConfiguration configuration)
         {
             _db = db;
             _passwordHasher = passwordHasher;
-            _permissions = permissions;
             _configuration = configuration;
         }
 
- 
+        // =========================================
+        // REGISTER
+        // =========================================
+
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(
-            [FromBody] AuthRequest request)
+            [FromBody] RegisterRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             if (request == null)
             {
                 return BadRequest(new
                 {
-                    message = "Request body is required."
+                    message =
+                        "Request body is required."
                 });
             }
 
-            var username = request.Username?.Trim();
+            var username =
+                request.Username?.Trim();
+
+            var roleName =
+                request.Role?.Trim();
 
             if (string.IsNullOrWhiteSpace(username))
             {
                 return BadRequest(new
                 {
-                    message = "Username is required."
+                    message =
+                        "Username is required."
                 });
             }
 
-            if (string.IsNullOrWhiteSpace(request.Password))
+            if (string.IsNullOrWhiteSpace(
+                request.Password))
             {
                 return BadRequest(new
                 {
-                    message = "Password is required."
+                    message =
+                        "Password is required."
                 });
             }
 
@@ -72,125 +82,238 @@ namespace Final_Task.Controllers
             {
                 return BadRequest(new
                 {
-                    message = "Password must be at least 6 characters."
+                    message =
+                        "Password must be at least 6 characters."
                 });
             }
 
-            var exists = await _db.Users
-                .AnyAsync(x => x.Username == username);
+            if (string.IsNullOrWhiteSpace(
+                request.ConfirmPassword))
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Confirm password is required."
+                });
+            }
+
+            if (request.Password !=
+                request.ConfirmPassword)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Passwords do not match."
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(roleName))
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Role is required."
+                });
+            }
+
+            // Check if username already exists.
+
+            var exists =
+                await _db.Users.AnyAsync(
+                    u => u.Username == username);
 
             if (exists)
             {
                 return Conflict(new
                 {
-                    message = "Username already exists."
+                    message =
+                        "Username already exists."
                 });
             }
 
+            // Find role by name.
+            // The frontend sends "Admin" or "User",
+            // NOT RoleId.
+
+            var role =
+                await _db.Roles
+                    .FirstOrDefaultAsync(
+                        r => r.Name == roleName);
+
+            if (role == null)
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "Role not found."
+                });
+            }
+
+            // Create user.
 
             var user = new User
             {
                 Username = username,
-                Role = "User"
+
+                // RoleId is assigned internally.
+                RoleId = role.Id
             };
 
             user.PasswordHash =
                 _passwordHasher.HashPassword(
                     user,
-                    request.Password
-                );
+                    request.Password);
 
             await _db.Users.AddAsync(user);
-            await _db.SaveChangesAsync();
 
+            await _db.SaveChangesAsync();
 
             return Ok(new
             {
-                message = "Registration successful.",
+                message =
+                    "Registration successful.",
+
                 user = new
                 {
                     id = user.Id,
                     username = user.Username,
-                    role = user.Role
+                    role = role.Name
                 }
             });
         }
 
+        // =========================================
+        // LOGIN
+        // =========================================
 
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(
             [FromBody] AuthRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             if (request == null)
             {
                 return BadRequest(new
                 {
-                    message = "Request body is required."
+                    message =
+                        "Request body is required."
                 });
             }
 
-            var username = request.Username?.Trim();
+            var username =
+                request.Username?.Trim();
 
-            if (string.IsNullOrWhiteSpace(username) ||
-                string.IsNullOrWhiteSpace(request.Password))
+            if (
+                string.IsNullOrWhiteSpace(username)
+                ||
+                string.IsNullOrWhiteSpace(
+                    request.Password))
             {
                 return Unauthorized(new
                 {
-                    message = "Invalid username or password."
+                    message =
+                        "Invalid username or password."
                 });
             }
 
-            var user = await _db.Users
-                .FirstOrDefaultAsync(x => x.Username == username);
+            // Load User + Role + Permissions.
+
+            var user =
+                await _db.Users
+                    .Include(u => u.Role)
+                    .ThenInclude(
+                        r => r!.RolePermissions)
+                    .FirstOrDefaultAsync(
+                        u => u.Username == username);
 
             if (user == null)
             {
                 return Unauthorized(new
                 {
-                    message = "Invalid username or password."
+                    message =
+                        "Invalid username or password."
                 });
             }
 
-            var passwordResult =
-                _passwordHasher.VerifyHashedPassword(
-                    user,
-                    user.PasswordHash,
-                    request.Password
-                );
+            if (user.Role == null)
+            {
+                return Unauthorized(new
+                {
+                    message =
+                        "User role is not configured."
+                });
+            }
 
-            if (passwordResult ==
+            // Verify password.
+
+            var passwordResult =
+                _passwordHasher
+                    .VerifyHashedPassword(
+                        user,
+                        user.PasswordHash,
+                        request.Password);
+
+            if (
+                passwordResult ==
                 PasswordVerificationResult.Failed)
             {
                 return Unauthorized(new
                 {
-                    message = "Invalid username or password."
+                    message =
+                        "Invalid username or password."
                 });
             }
 
+            // Generate JWT.
 
+            var token =
+                GenerateToken(user);
 
-            var token = GenerateToken(user);
+            // Return permissions to frontend.
+
+            var permissions =
+                user.Role.RolePermissions
+                    .Select(p => new
+                    {
+                        operation =
+                            p.Operation,
+
+                        permission =
+                            p.Permission.ToString()
+                    })
+                    .ToList();
 
             return Ok(new
             {
-                message = "Login successful.",
-                token = token,
-                tokenType = "Bearer",
-                expiresIn = 8 * 60 * 60,
+                message =
+                    "Login successful.",
+
+                token,
+
+                tokenType =
+                    "Bearer",
+
+                expiresIn =
+                    8 * 60 * 60,
+
                 user = new
                 {
                     id = user.Id,
-                    username = user.Username,
-                    role = user.Role
-                }
+
+                    username =
+                        user.Username,
+
+                    role =
+                        user.Role.Name
+                },
+
+                permissions
             });
         }
+
+        // =========================================
+        // ME
+        // =========================================
 
         [Authorize]
         [HttpGet("me")]
@@ -199,22 +322,47 @@ namespace Final_Task.Controllers
             return Ok(new
             {
                 authenticated =
-                    User.Identity?.IsAuthenticated ?? false,
+                    User.Identity?.IsAuthenticated
+                    ?? false,
 
-                userId = User.FindFirstValue(
-                    ClaimTypes.NameIdentifier
-                ),
+                userId =
+                    User.FindFirstValue(
+                        ClaimTypes.NameIdentifier),
 
-                username = User.FindFirstValue(
-                    ClaimTypes.Name
-                ),
+                username =
+                    User.FindFirstValue(
+                        ClaimTypes.Name),
 
-                role = User.FindFirstValue(
-                    ClaimTypes.Role
-                )
+                role =
+                    User.FindFirstValue(
+                        ClaimTypes.Role)
             });
         }
 
+        // =========================================
+        // GET ROLES
+        // =========================================
+
+        [AllowAnonymous]
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetRoles()
+        {
+            var roles =
+                await _db.Roles
+                    .OrderBy(r => r.Name)
+                    .Select(r => new
+                    {
+                        id = r.Id,
+                        name = r.Name
+                    })
+                    .ToListAsync();
+
+            return Ok(roles);
+        }
+
+        // =========================================
+        // GENERATE JWT
+        // =========================================
 
         private string GenerateToken(User user)
         {
@@ -248,38 +396,50 @@ namespace Final_Task.Controllers
                 );
             }
 
-            var claims = new List<Claim>
-            {
-                new Claim(
-                    ClaimTypes.NameIdentifier,
-                    user.Id.ToString()
-                ),
+            // Role object -> role NAME string.
 
-                new Claim(
-                    ClaimTypes.Name,
-                    user.Username
-                ),
+            var roleName =
+                user.Role?.Name
+                ?? string.Empty;
 
-                new Claim(
-                    ClaimTypes.Role,
-                    user.Role
-                ),
+            var claims =
+                new List<System.Security.Claims.Claim>
+                {
+                    new System.Security.Claims.Claim(
+                        ClaimTypes.NameIdentifier,
+                        user.Id.ToString()
+                    ),
 
-                new Claim(
-                    JwtRegisteredClaimNames.Sub,
-                    user.Id.ToString()
-                ),
+                    new System.Security.Claims.Claim(
+                        ClaimTypes.Name,
+                        user.Username
+                    ),
 
-                new Claim(
-                    JwtRegisteredClaimNames.UniqueName,
-                    user.Username
-                ),
+                    new System.Security.Claims.Claim(
+                        ClaimTypes.Role,
+                        roleName
+                    ),
 
-                new Claim(
-                    JwtRegisteredClaimNames.Jti,
-                    Guid.NewGuid().ToString()
-                )
-            };
+                    new System.Security.Claims.Claim(
+                        "role_id",
+                        user.RoleId.ToString()
+                    ),
+
+                    new System.Security.Claims.Claim(
+                        JwtRegisteredClaimNames.Sub,
+                        user.Id.ToString()
+                    ),
+
+                    new System.Security.Claims.Claim(
+                        JwtRegisteredClaimNames.UniqueName,
+                        user.Username
+                    ),
+
+                    new System.Security.Claims.Claim(
+                        JwtRegisteredClaimNames.Jti,
+                        Guid.NewGuid().ToString()
+                    )
+                };
 
             var key =
                 new SymmetricSecurityKey(
@@ -298,8 +458,10 @@ namespace Final_Task.Controllers
                     audience: audience,
                     claims: claims,
                     notBefore: DateTime.UtcNow,
-                    expires: DateTime.UtcNow.AddHours(8),
-                    signingCredentials: credentials
+                    expires:
+                        DateTime.UtcNow.AddHours(8),
+                    signingCredentials:
+                        credentials
                 );
 
             return new JwtSecurityTokenHandler()

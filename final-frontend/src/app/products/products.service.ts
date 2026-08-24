@@ -1,108 +1,69 @@
-import {
-  Injectable,
-  inject
-} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
-import {
-  HttpClient
-} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
-import {
-  Observable
-} from 'rxjs';
+import { Observable } from 'rxjs';
 
-import {
-  AuthService
-} from '../auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 
-import {
-  Product,
-  CreateProductRequest
-} from './products.model';
+import { Product, CreateProductRequest } from './products.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductsService {
+  private readonly http = inject(HttpClient);
 
-  private readonly http =
-    inject(HttpClient);
+  private readonly authService = inject(AuthService);
 
-  private readonly authService =
-    inject(AuthService);
-
-  private readonly baseUrl =
-    'http://localhost:5125/api/Products';
+  private readonly baseUrl = 'http://localhost:5125/api/Products';
 
   // -----------------------------------------
   // GET ALL PRODUCTS
   // -----------------------------------------
 
   getProducts(): Observable<Product[]> {
+    const token = this.authService.getToken();
 
-    const token =
-      this.authService.getToken();
-
-    return this.http.get<Product[]>(
-      this.baseUrl,
-      {
-        headers: token
-          ? {
-              Authorization:
-                `Bearer ${token}`
-            }
-          : {}
-      }
-    );
+    return this.http.get<Product[]>(this.baseUrl, {
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
+    });
   }
 
   // -----------------------------------------
   // GET ONE PRODUCT
   // -----------------------------------------
 
-  getProduct(
-    id: number
-  ): Observable<Product> {
+  getProduct(id: number): Observable<Product> {
+    const token = this.authService.getToken();
 
-    const token =
-      this.authService.getToken();
-
-    return this.http.get<Product>(
-      `${this.baseUrl}/${id}`,
-      {
-        headers: token
-          ? {
-              Authorization:
-                `Bearer ${token}`
-            }
-          : {}
-      }
-    );
+    return this.http.get<Product>(`${this.baseUrl}/${id}`, {
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
+    });
   }
 
   // -----------------------------------------
   // CREATE PRODUCT
   // -----------------------------------------
 
-  createProduct(
-    request: CreateProductRequest
-  ): Observable<Product> {
+  createProduct(request: CreateProductRequest): Observable<Product> {
+    const token = this.authService.getToken();
 
-    const token =
-      this.authService.getToken();
-
-    return this.http.post<Product>(
-      this.baseUrl,
-      request,
-      {
-        headers: token
-          ? {
-              Authorization:
-                `Bearer ${token}`
-            }
-          : {}
-      }
-    );
+    return this.http.post<Product>(this.baseUrl, request, {
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
+    });
   }
 
   // -----------------------------------------
@@ -110,20 +71,15 @@ export class ProductsService {
   // -----------------------------------------
   updateProduct(
     id: number,
-    request: CreateProductRequest
+    request: CreateProductRequest,
   ): Observable<Product> {
-    return this.http.put<Product>(
-      `${this.baseUrl}/${id}`,
-      request
-    );
+    return this.http.put<Product>(`${this.baseUrl}/${id}`, request);
   }
 
   // -----------------------------------------
   // DELETE PRODUCT
   // -----------------------------------------
   deleteProduct(id: number): Observable<any> {
-    return this.http.delete(
-      `${this.baseUrl}/${id}`
-    );
+    return this.http.delete(`${this.baseUrl}/${id}`);
   }
 }

@@ -8,93 +8,62 @@ import {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
-  MeResponse
+  MeResponse,
 } from './auth.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
 
-  private readonly baseUrl =
-    'http://localhost:5125/api/Auth';
+  private readonly baseUrl = 'http://localhost:5125/api/Auth';
 
-  private readonly tokenKey =
-    'salesbuzz_token';
+  private readonly tokenKey = 'salesbuzz_token';
 
-  private readonly userKey =
-    'salesbuzz_user';
+  private readonly userKey = 'salesbuzz_user';
 
-  login(
-    request: LoginRequest
-  ): Observable<LoginResponse> {
-    return this.http
-      .post<LoginResponse>(
-        `${this.baseUrl}/login`,
-        request
-      )
-      .pipe(
-        tap(response => {
-          localStorage.setItem(
-            this.tokenKey,
-            response.token
-          );
+  login(request: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/login`, request).pipe(
+      tap((response) => {
+        localStorage.setItem(this.tokenKey, response.token);
 
-          localStorage.setItem(
-            this.userKey,
-            JSON.stringify(response.user)
-          );
-        })
-      );
+        localStorage.setItem(this.userKey, JSON.stringify(response.user));
+      }),
+    );
   }
 
-  register(
-    request: RegisterRequest
-  ): Observable<RegisterResponse> {
+  register(request: RegisterRequest): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(
       `${this.baseUrl}/register`,
-      request
+      request,
     );
   }
 
   me(): Observable<MeResponse> {
     const token = this.getToken();
 
-    return this.http.get<MeResponse>(
-      `${this.baseUrl}/me`,
-      {
-        headers: token
-          ? {
-              Authorization:
-                `Bearer ${token}`
-            }
-          : {}
-      }
-    );
+    return this.http.get<MeResponse>(`${this.baseUrl}/me`, {
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
+    });
   }
 
   logout(): void {
-    localStorage.removeItem(
-      this.tokenKey
-    );
+    localStorage.removeItem(this.tokenKey);
 
-    localStorage.removeItem(
-      this.userKey
-    );
+    localStorage.removeItem(this.userKey);
   }
 
   getToken(): string | null {
-    return localStorage.getItem(
-      this.tokenKey
-    );
+    return localStorage.getItem(this.tokenKey);
   }
 
   getUser(): AuthUser | null {
-    const value =
-      localStorage.getItem(
-        this.userKey
-      );
+    const value = localStorage.getItem(this.userKey);
 
     if (!value) {
       return null;
@@ -103,9 +72,7 @@ export class AuthService {
     try {
       return JSON.parse(value) as AuthUser;
     } catch {
-      localStorage.removeItem(
-        this.userKey
-      );
+      localStorage.removeItem(this.userKey);
 
       return null;
     }
@@ -116,9 +83,6 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    return (
-      this.getUser()?.role?.toLowerCase() ===
-      'admin'
-    );
+    return this.getUser()?.role?.toLowerCase() === 'admin';
   }
 }

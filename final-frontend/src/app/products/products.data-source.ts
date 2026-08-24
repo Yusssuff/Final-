@@ -45,12 +45,6 @@ export class ProductsDataSource
       controlType: ControlTypes.Text,
     },
     {
-      Name: 'description',
-      DataType: DataTypes.Text,
-      Length: 500,
-      controlType: ControlTypes.Text,
-    },
-    {
       Name: 'price',
       DataType: DataTypes.NUMERIC,
       controlType: ControlTypes.Number,
@@ -115,13 +109,31 @@ export class ProductsDataSource
       next: (products) => {
         this.data = Array.isArray(products) ? products : [];
 
-        const skip = this.getSkip(filter);
+        // Determine if the provided filter is a query-string (paging/filter from BI-Grid)
+        const isQueryString = /[=&?]/.test(filter);
 
+        let source = this.data;
+
+        // If the caller passed a plain search term (no '=' or '&'), perform a client-side
+        // text search over name and description fields to support the app search box.
+        if (filter && !isQueryString) {
+          const q = filter.trim().toLowerCase();
+          if (q.length > 0) {
+            source = this.data.filter((p) => {
+              const name = (p.name || '').toString().toLowerCase();
+              const idStr = (p.id || '').toString();
+
+              return name.includes(q) || idStr === q;
+            });
+          }
+        }
+
+        const skip = this.getSkip(filter);
         const take = this.getTake(filter);
 
-        const total = this.data.length;
+        const total = source.length;
 
-        const page = this.data.slice(skip, skip + take);
+        const page = source.slice(skip, skip + take);
 
         this.state.skip = skip;
 

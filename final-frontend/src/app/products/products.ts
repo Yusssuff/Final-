@@ -1,33 +1,14 @@
-import {
-  Component,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 
-import {
-  CommonModule,
-  DecimalPipe
-} from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 
-import {
-  FormsModule
-} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 
-import {
-  BIGridComponent,
-  BIModulesModule
-} from 'bi-modules';
+import { BIGridComponent, BIModulesModule } from 'bi-modules';
 
-import {
-  ControlTypes,
-  DataTypes,
-  IChangeset,
-  IColumns
-} from 'bi-interfaces';
+import { ControlTypes, DataTypes, IChangeset, IColumns } from 'bi-interfaces';
 
-import {
-  ProductsDataSource
-} from './products.data-source';
+import { ProductsDataSource } from './products.data-source';
 
 import { AuthService } from '../auth/auth.service';
 import { ProductsService } from './products.service';
@@ -37,291 +18,263 @@ import { ProductsService } from './products.service';
 
   standalone: true,
 
-  imports: [
-    CommonModule,
-    FormsModule,
-    BIModulesModule
-  ],
+  imports: [CommonModule, FormsModule, BIModulesModule],
 
   templateUrl: './products.html',
 
-styleUrls: ['./products.css'],
+  styleUrls: ['./products.css'],
 
-providers: [DecimalPipe]
+  providers: [DecimalPipe],
 })
-export class Products
-  implements OnInit {
-
-  @ViewChild(
-    'productsGrid'
-  )
+export class Products implements OnInit {
+  @ViewChild('productsGrid')
   grid?: BIGridComponent;
 
-  readonly changeSet:
-    IChangeset = {
-      changesetArr: []
-    };
+  readonly changeSet: IChangeset = {
+    changesetArr: [],
+  };
 
-  readonly columns:
-    IColumns[] = [
+  readonly columns: IColumns[] = [
+    {
+      Name: 'id',
 
-      {
-        Name: 'id',
+      DisplayName: 'ID',
 
-        DisplayName: 'ID',
+      DataType: DataTypes.NUMERIC,
 
-        DataType:
-          DataTypes.NUMERIC,
+      controlType: ControlTypes.Number,
 
-        controlType:
-          ControlTypes.Number,
+      IsEditable: false,
 
-        IsEditable: false,
+      IsFilterable: true,
 
-        IsFilterable: true,
+      IsVisible: true,
 
-        IsVisible: true,
+      DefaultValue: null,
 
-        DefaultValue: null,
+      Width: 90,
 
-        Width: 90,
+      DomID: 'ProductID',
+    } as IColumns,
 
-        DomID: 'ProductID'
+    {
+      Name: 'name',
 
-      } as IColumns,
+      DisplayName: 'Product',
 
-      {
-        Name: 'name',
+      DataType: DataTypes.Text,
 
-        DisplayName: 'Product',
+      controlType: ControlTypes.Text,
 
-        DataType:
-          DataTypes.Text,
+      IsEditable: true,
 
-        controlType:
-          ControlTypes.Text,
+      IsFilterable: true,
 
-        IsEditable: true,
+      IsVisible: true,
 
-        IsFilterable: true,
+      DefaultValue: '',
 
-        IsVisible: true,
+      Width: 240,
 
-        DefaultValue: '',
+      DomID: 'ProductName',
+    } as IColumns,
 
-        Width: 240,
+    {
+      Name: 'price',
 
-        DomID: 'ProductName'
+      DisplayName: 'Price',
 
-      } as IColumns,
+      DataType: DataTypes.NUMERIC,
 
-      {
-        Name: 'description',
+      controlType: ControlTypes.Number,
 
-        DisplayName: 'Description',
+      IsEditable: true,
 
-        DataType:
-          DataTypes.Text,
+      IsFilterable: true,
 
-        controlType:
-          ControlTypes.Text,
+      IsVisible: true,
 
-        IsEditable: true,
+      DefaultValue: 0,
 
-        IsFilterable: true,
+      Width: 130,
 
-        IsVisible: true,
+      DomID: 'Price',
+    } as IColumns,
 
-        DefaultValue: '',
+    {
+      Name: 'quantity',
 
-        Width: 320,
+      DisplayName: 'Quantity',
 
-        DomID: 'Description'
+      DataType: DataTypes.NUMERIC,
 
-      } as IColumns,
+      controlType: ControlTypes.Number,
 
-      {
-        Name: 'price',
+      IsEditable: true,
 
-        DisplayName: 'Price',
+      IsFilterable: true,
 
-        DataType:
-          DataTypes.NUMERIC,
+      IsVisible: true,
 
-        controlType:
-          ControlTypes.Number,
+      DefaultValue: 0,
 
-        IsEditable: true,
+      Width: 130,
 
-        IsFilterable: true,
-
-        IsVisible: true,
-
-        DefaultValue: 0,
-
-        Width: 130,
-
-        DomID: 'Price'
-
-      } as IColumns,
-
-      {
-        Name: 'quantity',
-
-        DisplayName: 'Quantity',
-
-        DataType:
-          DataTypes.NUMERIC,
-
-        controlType:
-          ControlTypes.Number,
-
-        IsEditable: true,
-
-        IsFilterable: true,
-
-        IsVisible: true,
-
-        DefaultValue: 0,
-
-        Width: 130,
-
-        DomID: 'Quantity'
-
-      } as IColumns
-    ];
+      DomID: 'Quantity',
+    } as IColumns,
+  ];
 
   searchValue = '';
 
   constructor(
-    public readonly dataSource:
-      ProductsDataSource,
+    public readonly dataSource: ProductsDataSource,
     private readonly auth: AuthService,
-    private readonly productsService: ProductsService
+    private readonly productsService: ProductsService,
   ) {}
 
   get isAdmin(): boolean {
     return this.auth.isAdmin();
   }
 
-  // Template helper: returns the changeSet or null typed as any so the template
-  // can pass null to BI-Grid to disable edit UI for non-admins without
-  // triggering Angular's strict template type checks.
+
   get changeSetBinding(): any {
     return this.isAdmin ? this.changeSet : null;
   }
 
-ngOnInit(): void {
-  this.dataSource.read();
-}
+  ngOnInit(): void {
+    this.dataSource.read();
+  }
 
-searchProducts(
-  event: Event
-): void {
-  const input =
-    event.target as HTMLInputElement;
+  searchProducts(event: Event): void {
+    const input = event.target as HTMLInputElement;
 
-  this.searchValue =
-    input.value;
+    this.searchValue = input.value;
 
-  this.dataSource.read();
-}
+    // Pass the plain search term to the datasource so it performs client-side filtering
+    this.dataSource.read(this.searchValue);
+  }
 
-clearSearch(): void {
-  this.searchValue = '';
-  this.dataSource.read();
-}
+  clearSearch(): void {
+    this.searchValue = '';
+    this.dataSource.read('');
+  }
   refresh(): void {
-
     this.grid?.read();
   }
 
-// -----------------------------------------
-// Admin actions: prompt-based quick flows
-// -----------------------------------------
+  // -----------------------------------------
+  // Admin modal-based flows
+  // -----------------------------------------
 
-addProductPrompt(): void {
-  const name = window.prompt('Product name:');
-  if (!name) { return; }
+  showModal = false;
 
-  const description = window.prompt('Product description:') ?? '';
-  const priceStr = window.prompt('Price (numeric):', '0') ?? '0';
-  const quantityStr = window.prompt('Quantity (integer):', '0') ?? '0';
+  editingId: number | null = null;
 
-  const price = parseFloat(priceStr) || 0;
-  const quantity = parseInt(quantityStr, 10) || 0;
+  modalProduct: {
+    name: string;
+    price: number;
+    quantity: number;
+  } = {
+    name: '',
+    price: 0,
+    quantity: 0,
+  };
 
-  this.productsService.createProduct({
-    name: name.trim(),
-    description: description.trim(),
-    price,
-    quantity
-  }).subscribe({
-    next: () => {
-      this.grid?.read();
-      alert('Product created');
-    },
-    error: (err) => {
-      console.error(err);
-      alert('Failed to create product');
+  openAddModal(): void {
+    this.editingId = null;
+    this.modalProduct = { name: '', price: 0, quantity: 0 };
+    this.showModal = true;
+  }
+
+  openSelectEdit(): void {
+    const idStr = window.prompt('Enter product ID to edit:');
+    const id = idStr ? parseInt(idStr, 10) : NaN;
+    if (!id || isNaN(id)) {
+      return;
     }
-  });
-}
+    this.openEditModal(id);
+  }
 
-editProductPrompt(): void {
-  const idStr = window.prompt('Enter product ID to edit:');
-  const id = idStr ? parseInt(idStr, 10) : NaN;
-  if (!id || isNaN(id)) { return; }
+  openEditModal(id: number): void {
+    this.productsService.getProduct(id).subscribe({
+      next: (product) => {
+        this.editingId = id;
+        this.modalProduct = {
+          name: product.name,
+          price: product.price,
+          quantity: product.quantity,
+        };
+        this.showModal = true;
+      },
+      error: () => {
+        alert('Failed to load product for editing');
+      },
+    });
+  }
 
-  this.productsService.getProduct(id).subscribe({
-    next: (product) => {
-      const name = window.prompt('Product name:', product.name) ?? product.name;
-      const description = window.prompt('Product description:', product.description) ?? product.description;
-      const priceStr = window.prompt('Price (numeric):', String(product.price)) ?? String(product.price);
-      const quantityStr = window.prompt('Quantity (integer):', String(product.quantity)) ?? String(product.quantity);
+  openSelectDelete(): void {
+    const idStr = window.prompt('Enter product ID to delete:');
+    const id = idStr ? parseInt(idStr, 10) : NaN;
+    if (!id || isNaN(id)) {
+      return;
+    }
 
-      const price = parseFloat(priceStr) || 0;
-      const quantity = parseInt(quantityStr, 10) || 0;
+    if (!confirm(`Delete product id ${id}? This cannot be undone.`)) {
+      return;
+    }
 
-      this.productsService.updateProduct(id, {
-        name: name.trim(),
-        description: description.trim(),
-        price,
-        quantity
-      }).subscribe({
+    this.productsService.deleteProduct(id).subscribe({
+      next: () => {
+        this.grid?.read();
+        alert('Product deleted');
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Failed to delete product');
+      },
+    });
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+  }
+
+  submitModal(): void {
+    const payload = {
+      name: (this.modalProduct.name || '').trim(),
+      price: Number(this.modalProduct.price) || 0,
+      quantity: Number(this.modalProduct.quantity) || 0,
+    };
+
+    if (!payload.name) {
+      alert('Name is required');
+      return;
+    }
+
+    if (this.editingId) {
+      this.productsService.updateProduct(this.editingId, payload).subscribe({
         next: () => {
+          this.showModal = false;
           this.grid?.read();
           alert('Product updated');
         },
         error: (err) => {
           console.error(err);
           alert('Failed to update product');
-        }
+        },
       });
-    },
-    error: (err) => {
-      console.error(err);
-      alert('Product not found or error reading product');
+    } else {
+      this.productsService.createProduct(payload).subscribe({
+        next: () => {
+          this.showModal = false;
+          this.grid?.read();
+          alert('Product created');
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Failed to create product');
+        },
+      });
     }
-  });
-}
-
-deleteProductPrompt(): void {
-  const idStr = window.prompt('Enter product ID to delete:');
-  const id = idStr ? parseInt(idStr, 10) : NaN;
-  if (!id || isNaN(id)) { return; }
-
-  if (!confirm(`Delete product id ${id}? This cannot be undone.`)) { return; }
-
-  this.productsService.deleteProduct(id).subscribe({
-    next: () => {
-      this.grid?.read();
-      alert('Product deleted');
-    },
-    error: (err) => {
-      console.error(err);
-      alert('Failed to delete product');
-    }
-  });
-}
+  }
 }

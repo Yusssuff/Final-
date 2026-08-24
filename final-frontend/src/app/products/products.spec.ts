@@ -1,34 +1,20 @@
-import {
-  ComponentFixture,
-  TestBed
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  Products
-} from './products';
+import { Products } from './products';
 
 describe('Products', () => {
-
   let component: Products;
 
-  let fixture:
-    ComponentFixture<Products>;
+  let fixture: ComponentFixture<Products>;
 
   beforeEach(async () => {
-
     await TestBed.configureTestingModule({
-      imports: [
-        Products
-      ]
+      imports: [Products],
     }).compileComponents();
 
-    fixture =
-      TestBed.createComponent(
-        Products
-      );
+    fixture = TestBed.createComponent(Products);
 
-    component =
-      fixture.componentInstance;
+    component = fixture.componentInstance;
 
     fixture.detectChanges();
   });
@@ -36,5 +22,4 @@ describe('Products', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
 });

@@ -1,33 +1,21 @@
-<div
-  class="min-h-screen bg-[#080b12] px-4 py-6 text-white sm:px-6 lg:px-8"
->
+<div class="min-h-screen bg-[#080b12] px-4 py-6 text-white sm:px-6 lg:px-8">
   <div class="mx-auto max-w-7xl">
-
     <!-- Header -->
     <div
       class="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
     >
-
       <div>
-
         <p
           class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-400"
         >
           SalesBuzz
         </p>
 
-        <h1
-          class="mt-2 text-3xl font-semibold tracking-tight"
-        >
-          Products
-        </h1>
+        <h1 class="mt-2 text-3xl font-semibold tracking-tight">Products</h1>
 
-        <p
-          class="mt-2 text-sm text-slate-400"
-        >
+        <p class="mt-2 text-sm text-slate-400">
           Manage your products and inventory.
         </p>
-
       </div>
 
       <button
@@ -41,7 +29,7 @@
       <button
         *ngIf="isAdmin"
         type="button"
-        (click)="addProductPrompt()"
+        (click)="openAddModal()"
         class="rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-green-500"
       >
         Add Product
@@ -50,7 +38,7 @@
       <button
         *ngIf="isAdmin"
         type="button"
-        (click)="editProductPrompt()"
+        (click)="openSelectEdit()"
         class="rounded-xl bg-yellow-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-yellow-500"
       >
         Edit Product
@@ -59,28 +47,76 @@
       <button
         *ngIf="isAdmin"
         type="button"
-        (click)="deleteProductPrompt()"
+        (click)="openSelectDelete()"
         class="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-500"
       >
         Delete Product
       </button>
 
+      <!-- Modal -->
+      <div
+        *ngIf="showModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div class="w-full max-w-lg rounded-lg bg-white p-6 text-black">
+          <h2 class="mb-4 text-xl font-semibold">
+            {{ editingId ? 'Edit Product' : 'Add Product' }}
+          </h2>
+
+          <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Name</label>
+            <input
+              [(ngModel)]="modalProduct.name"
+              class="w-full rounded border px-3 py-2"
+            />
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="block text-sm font-medium mb-1">Price</label>
+              <input
+                type="number"
+                [(ngModel)]="modalProduct.price"
+                class="w-full rounded border px-3 py-2"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Quantity</label>
+              <input
+                type="number"
+                [(ngModel)]="modalProduct.quantity"
+                class="w-full rounded border px-3 py-2"
+              />
+            </div>
+          </div>
+
+          <div class="mt-4 flex justify-end gap-2">
+            <button
+              (click)="closeModal()"
+              class="rounded px-4 py-2 bg-gray-200"
+            >
+              Cancel
+            </button>
+            <button
+              (click)="submitModal()"
+              class="rounded px-4 py-2 bg-indigo-600 text-white"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Search -->
-    <section
-      class="mb-6 rounded-2xl bg-[#111620] p-4"
-    >
-
-      <div
-        class="flex flex-col gap-3 sm:flex-row"
-      >
-
+    <section class="mb-6 rounded-2xl bg-[#111620] p-4">
+      <div class="flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
           [(ngModel)]="searchValue"
           (input)="searchProducts($event)"
-          placeholder="Search by ID, name or description..."
+          placeholder="Search by ID or name..."
           class="w-full rounded-xl bg-[#1a202c] px-4 py-3.5 text-sm text-white placeholder:text-slate-500 outline-none ring-1 ring-white/5 focus:ring-2 focus:ring-indigo-500/50"
         />
 
@@ -91,40 +127,24 @@
         >
           Clear
         </button>
-
       </div>
-
     </section>
 
     <!-- BI GRID -->
-    <div
-      class="overflow-hidden rounded-2xl bg-[#111620]"
-    >
-
+    <div class="overflow-hidden rounded-2xl bg-[#111620]">
       <BI-Grid
         #productsGrid
-
         [DataService]="dataSource"
-
         [changeSet]="changeSetBinding"
-
         [Columns]="columns"
-
         [GridName]="'Products'"
-
         [DomID]="'Products_Grid'"
-
         [HasPaging]="true"
-
         [HasSelectAll]="false"
-
         [HasExport]="false"
-
         [height]="500"
       >
       </BI-Grid>
-
     </div>
-
   </div>
 </div>

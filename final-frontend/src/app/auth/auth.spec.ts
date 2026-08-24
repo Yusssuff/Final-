@@ -1,7 +1,4 @@
-import {
-  ComponentFixture,
-  TestBed
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuthComponent } from './auth.component';
 
@@ -11,14 +8,12 @@ describe('AuthComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthComponent]
+      imports: [AuthComponent],
     }).compileComponents();
 
-    fixture =
-      TestBed.createComponent(AuthComponent);
+    fixture = TestBed.createComponent(AuthComponent);
 
-    component =
-      fixture.componentInstance;
+    component = fixture.componentInstance;
 
     fixture.detectChanges();
   });

@@ -1,5 +1,4 @@
-﻿using System.Data;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -41,15 +40,14 @@ namespace Final_Task.Controllers
         [HttpGet("roles")]
         public async Task<IActionResult> GetRoles()
         {
+            var connectionString = GetConnectionString();
+
             var roles = new List<RoleOption>();
 
             await using var connection =
-                _db.Database.GetDbConnection();
+                new SqlConnection(connectionString);
 
-            if (connection.State != ConnectionState.Open)
-            {
-                await connection.OpenAsync();
-            }
+            await connection.OpenAsync();
 
             await using var command =
                 connection.CreateCommand();
@@ -70,14 +68,21 @@ namespace Final_Task.Controllers
 
             while (await reader.ReadAsync())
             {
+                var roleId =
+                    reader.IsDBNull(0)
+                        ? string.Empty
+                        : reader.GetString(0).Trim();
+
+                var description =
+                    reader.IsDBNull(1)
+                        ? roleId
+                        : reader.GetString(1).Trim();
+
                 roles.Add(
                     new RoleOption
                     {
-                        RoleID =
-                            reader.GetString(0).Trim(),
-
-                        Description =
-                            reader.GetString(1).Trim()
+                        RoleID = roleId,
+                        Description = description
                     });
             }
 
@@ -115,7 +120,8 @@ namespace Final_Task.Controllers
                 });
             }
 
-            if (string.IsNullOrWhiteSpace(request.Password))
+            if (string.IsNullOrWhiteSpace(
+                request.Password))
             {
                 return BadRequest(new
                 {
@@ -152,7 +158,8 @@ namespace Final_Task.Controllers
                 });
             }
 
-            if (string.IsNullOrWhiteSpace(requestedRole))
+            if (string.IsNullOrWhiteSpace(
+                requestedRole))
             {
                 return BadRequest(new
                 {
@@ -172,17 +179,18 @@ namespace Final_Task.Controllers
             {
                 return Conflict(new
                 {
-                    message = "Username already exists."
+                    message =
+                        "Username already exists."
                 });
             }
 
             // --------------------------------------------------------
-            // Find the selected role in SalesBuzz
-            // HH_SA_Roles
+            // Find role in SalesBuzz
             // --------------------------------------------------------
 
             var role =
-                await FindRoleAsync(requestedRole);
+                await FindRoleAsync(
+                    requestedRole);
 
             if (role == null)
             {
@@ -195,13 +203,6 @@ namespace Final_Task.Controllers
 
             // --------------------------------------------------------
             // Create application user
-            //
-            // IMPORTANT:
-            // Users.Role stores the SalesBuzz RoleID.
-            // Example:
-            //
-            // User -> user
-            // Admin -> admin
             // --------------------------------------------------------
 
             var user = new User
@@ -219,6 +220,24 @@ namespace Final_Task.Controllers
 
             await _db.SaveChangesAsync();
 
+            // --------------------------------------------------------
+            // Assign the new user to the application's BU
+            //
+            // The BU comes from HH_SA_BU.
+            // We do not invent a BUID in code.
+            // --------------------------------------------------------
+
+            var defaultBuid =
+                await GetDefaultBuidAsync();
+
+            if (!string.IsNullOrWhiteSpace(
+                defaultBuid))
+            {
+                await AssignUserToBuidAsync(
+                    user.Id,
+                    defaultBuid);
+            }
+
             return Ok(new
             {
                 message =
@@ -232,7 +251,13 @@ namespace Final_Task.Controllers
                         user.Username,
 
                     role =
-                        role.Description
+                        role.Description,
+
+                    roleId =
+                        role.RoleID,
+
+                    buid =
+                        defaultBuid
                 }
             });
         }
@@ -259,7 +284,8 @@ namespace Final_Task.Controllers
                 request.Username?.Trim();
 
             if (string.IsNullOrWhiteSpace(username) ||
-                string.IsNullOrWhiteSpace(request.Password))
+                string.IsNullOrWhiteSpace(
+                    request.Password))
             {
                 return Unauthorized(new
                 {
@@ -291,10 +317,11 @@ namespace Final_Task.Controllers
             // --------------------------------------------------------
 
             var passwordResult =
-                _passwordHasher.VerifyHashedPassword(
-                    user,
-                    user.PasswordHash,
-                    request.Password);
+                _passwordHasher
+                    .VerifyHashedPassword(
+                        user,
+                        user.PasswordHash,
+                        request.Password);
 
             if (passwordResult ==
                 PasswordVerificationResult.Failed)
@@ -307,10 +334,11 @@ namespace Final_Task.Controllers
             }
 
             // --------------------------------------------------------
-            // Validate user's SalesBuzz role
+            // Validate role
             // --------------------------------------------------------
 
-            if (string.IsNullOrWhiteSpace(user.Role))
+            if (string.IsNullOrWhiteSpace(
+                user.Role))
             {
                 return Unauthorized(new
                 {
@@ -320,7 +348,8 @@ namespace Final_Task.Controllers
             }
 
             var role =
-                await FindRoleAsync(user.Role);
+                await FindRoleAsync(
+                    user.Role);
 
             if (role == null)
             {
@@ -332,27 +361,26 @@ namespace Final_Task.Controllers
             }
 
             // --------------------------------------------------------
-            // Generate JWT
+            // Get user's BUID
             //
             // IMPORTANT:
-            // SalesBuzz CurrentBUClass.GetUserRoleID()
-            // reads ClaimTypes.Role.
-            //
-            // Therefore this must contain:
-            //
-            // admin
-            // or
-            // user
-            //
-            // NOT the display name.
+            // HH_SA_UserBUPermissions.UserID contains
+            // the application user's ID as a string.
             // --------------------------------------------------------
 
-            var buid = await GetUserBuidAsync(user.Username);
-                        var token =
-                            GenerateToken(
-                                user,
-                                role.RoleID,
-                                buid);
+            var buid =
+                await GetUserBuidAsync(
+                    user.Id);
+
+            // --------------------------------------------------------
+            // Generate JWT
+            // --------------------------------------------------------
+
+            var token =
+                GenerateToken(
+                    user,
+                    role.RoleID,
+                    buid);
 
             return Ok(new
             {
@@ -369,7 +397,8 @@ namespace Final_Task.Controllers
 
                 user = new
                 {
-                    id = user.Id,
+                    id =
+                        user.Id,
 
                     username =
                         user.Username,
@@ -378,7 +407,9 @@ namespace Final_Task.Controllers
                         role.Description,
 
                     roleId =
-                        role.RoleID
+                        role.RoleID,
+
+                    buid
                 }
             });
         }
@@ -407,7 +438,11 @@ namespace Final_Task.Controllers
 
                 role =
                     User.FindFirstValue(
-                        ClaimTypes.Role)
+                        ClaimTypes.Role),
+
+                buid =
+                    User.FindFirstValue(
+                        "BUID")
             });
         }
 
@@ -423,13 +458,13 @@ namespace Final_Task.Controllers
                 return null;
             }
 
-            await using var connection =
-                _db.Database.GetDbConnection();
+            var connectionString =
+                GetConnectionString();
 
-            if (connection.State != ConnectionState.Open)
-            {
-                await connection.OpenAsync();
-            }
+            await using var connection =
+                new SqlConnection(connectionString);
+
+            await connection.OpenAsync();
 
             await using var command =
                 connection.CreateCommand();
@@ -443,21 +478,18 @@ namespace Final_Task.Controllers
                     ) AS Description
                 FROM dbo.HH_SA_Roles
                 WHERE
-                    LOWER(RoleID) = LOWER(@value)
-                    OR LOWER(Description) = LOWER(@value)
-                    OR LOWER(DescriptionA) = LOWER(@value);
+                    LOWER(RoleID) =
+                        LOWER(@value)
+                    OR LOWER(Description) =
+                        LOWER(@value)
+                    OR LOWER(DescriptionA) =
+                        LOWER(@value);
                 """;
 
-            var parameter =
-                command.CreateParameter();
-
-            parameter.ParameterName =
-                "@value";
-
-            parameter.Value =
-                value.Trim();
-
-            command.Parameters.Add(parameter);
+            command.Parameters.Add(
+                new SqlParameter(
+                    "@value",
+                    value.Trim()));
 
             await using var reader =
                 await command.ExecuteReaderAsync();
@@ -467,16 +499,203 @@ namespace Final_Task.Controllers
                 return null;
             }
 
+            var roleId =
+                reader.IsDBNull(0)
+                    ? string.Empty
+                    : reader.GetString(0).Trim();
+
+            var description =
+                reader.IsDBNull(1)
+                    ? roleId
+                    : reader.GetString(1).Trim();
+
             return new RoleOption
             {
-                RoleID =
-                    reader.GetString(0).Trim(),
-
-                Description =
-                    reader.IsDBNull(1)
-                        ? reader.GetString(0).Trim()
-                        : reader.GetString(1).Trim()
+                RoleID = roleId,
+                Description = description
             };
+        }
+
+        // ============================================================
+        // GET DEFAULT BUID
+        // ============================================================
+
+        private async Task<string?> GetDefaultBuidAsync()
+        {
+            var connectionString =
+                GetConnectionString();
+
+            await using var connection =
+                new SqlConnection(connectionString);
+
+            await connection.OpenAsync();
+
+            await using var command =
+                connection.CreateCommand();
+
+            command.CommandText = """
+                SELECT TOP 1
+                    BUID
+                FROM dbo.HH_SA_BU
+                ORDER BY BUID;
+                """;
+
+            var result =
+                await command.ExecuteScalarAsync();
+
+            if (result == null ||
+                result == DBNull.Value)
+            {
+                return null;
+            }
+
+            var buid =
+                result.ToString()?.Trim();
+
+            return string.IsNullOrWhiteSpace(buid)
+                ? null
+                : buid;
+        }
+
+        // ============================================================
+        // GET USER BUID
+        // ============================================================
+
+        private async Task<string?> GetUserBuidAsync(
+            int userId)
+        {
+            var connectionString =
+                GetConnectionString();
+
+            await using var connection =
+                new SqlConnection(connectionString);
+
+            await connection.OpenAsync();
+
+            await using var command =
+                connection.CreateCommand();
+
+            command.CommandText = """
+                SELECT TOP 1
+                    BUID
+                FROM dbo.HH_SA_UserBUPermissions
+                WHERE UserID = @userId
+                ORDER BY BUID;
+                """;
+
+            command.Parameters.Add(
+                new SqlParameter(
+                    "@userId",
+                    userId.ToString()));
+
+            var result =
+                await command.ExecuteScalarAsync();
+
+            if (result == null ||
+                result == DBNull.Value)
+            {
+                return null;
+            }
+
+            var buid =
+                result.ToString()?.Trim();
+
+            return string.IsNullOrWhiteSpace(buid)
+                ? null
+                : buid;
+        }
+
+        // ============================================================
+        // ASSIGN USER TO BUID
+        // ============================================================
+
+        private async Task AssignUserToBuidAsync(
+            int userId,
+            string buid)
+        {
+            if (string.IsNullOrWhiteSpace(buid))
+            {
+                return;
+            }
+
+            var connectionString =
+                GetConnectionString();
+
+            await using var connection =
+                new SqlConnection(connectionString);
+
+            await connection.OpenAsync();
+
+            // Check whether assignment already exists.
+
+            await using (
+                var checkCommand =
+                    connection.CreateCommand())
+            {
+                checkCommand.CommandText = """
+                    SELECT COUNT(1)
+                    FROM dbo.HH_SA_UserBUPermissions
+                    WHERE UserID = @userId
+                      AND BUID = @buid;
+                    """;
+
+                checkCommand.Parameters.Add(
+                    new SqlParameter(
+                        "@userId",
+                        userId.ToString()));
+
+                checkCommand.Parameters.Add(
+                    new SqlParameter(
+                        "@buid",
+                        buid.Trim()));
+
+                var exists =
+                    Convert.ToInt32(
+                        await checkCommand
+                            .ExecuteScalarAsync());
+
+                if (exists > 0)
+                {
+                    return;
+                }
+            }
+
+            await using var insertCommand =
+                connection.CreateCommand();
+
+            insertCommand.CommandText = """
+                INSERT INTO dbo.HH_SA_UserBUPermissions
+                (
+                    UserID,
+                    BUID,
+                    CreatedOn,
+                    Createdby
+                )
+                VALUES
+                (
+                    @userId,
+                    @buid,
+                    SYSDATETIME(),
+                    @createdBy
+                );
+                """;
+
+            insertCommand.Parameters.Add(
+                new SqlParameter(
+                    "@userId",
+                    userId.ToString()));
+
+            insertCommand.Parameters.Add(
+                new SqlParameter(
+                    "@buid",
+                    buid.Trim()));
+
+            insertCommand.Parameters.Add(
+                new SqlParameter(
+                    "@createdBy",
+                    "system"));
+
+            await insertCommand.ExecuteNonQueryAsync();
         }
 
         // ============================================================
@@ -485,234 +704,137 @@ namespace Final_Task.Controllers
 
         private string GenerateToken(
             User user,
-                    string roleId,
-                    string? buid = null)
+            string roleId,
+            string? buid)
+        {
+            var jwtKey =
+                _configuration["JWT:Key"];
+
+            var issuer =
+                _configuration["JWT:ValidIssuer"];
+
+            var audience =
+                _configuration["JWT:ValidAudience"];
+
+            if (string.IsNullOrWhiteSpace(jwtKey))
+            {
+                throw new InvalidOperationException(
+                    "JWT:Key is missing.");
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                issuer))
+            {
+                throw new InvalidOperationException(
+                    "JWT:ValidIssuer is missing.");
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                audience))
+            {
+                throw new InvalidOperationException(
+                    "JWT:ValidAudience is missing.");
+            }
+
+            var claims =
+                new List<Claim>
                 {
-                    var jwtKey =
-                        _configuration["JWT:Key"];
+                    new Claim(
+                        ClaimTypes.NameIdentifier,
+                        user.Id.ToString()),
 
-                    var issuer =
-                        _configuration["JWT:ValidIssuer"];
+                    new Claim(
+                        ClaimTypes.Name,
+                        user.Username),
 
-                    var audience =
-                        _configuration["JWT:ValidAudience"];
+                    // SalesBuzz reads this claim
+                    // to determine the user's role.
+                    new Claim(
+                        ClaimTypes.Role,
+                        roleId),
 
-                    if (string.IsNullOrWhiteSpace(jwtKey))
-                    {
-                        throw new InvalidOperationException(
-                            "JWT:Key is missing."
-                        );
-                    }
+                    // Application role claim.
+                    new Claim(
+                        "role_id",
+                        roleId),
 
-                    if (string.IsNullOrWhiteSpace(issuer))
-                    {
-                        throw new InvalidOperationException(
-                            "JWT:ValidIssuer is missing."
-                        );
-                    }
+                    new Claim(
+                        JwtRegisteredClaimNames.Sub,
+                        user.Id.ToString()),
 
-                    if (string.IsNullOrWhiteSpace(audience))
-                    {
-                        throw new InvalidOperationException(
-                            "JWT:ValidAudience is missing."
-                        );
-                    }
+                    new Claim(
+                        JwtRegisteredClaimNames.UniqueName,
+                        user.Username),
 
-                    var claims =
-                        new List<Claim>
-                        {
-                            // User ID
-                            new Claim(
-                                ClaimTypes.NameIdentifier,
-                                user.Id.ToString()),
+                    new Claim(
+                        JwtRegisteredClaimNames.Jti,
+                        Guid.NewGuid().ToString())
+                };
 
-                            // Username
-                            new Claim(
-                                ClaimTypes.Name,
-                                user.Username),
+            if (!string.IsNullOrWhiteSpace(buid))
+            {
+                claims.Add(
+                    new Claim(
+                        "BUID",
+                        buid.Trim()));
+            }
 
-                            // IMPORTANT:
-                            // SalesBuzz reads this claim
-                            // to determine the user's role.
-                            new Claim(
-                                ClaimTypes.Role,
-                                roleId),
+            var key =
+                new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtKey));
 
-                            // Optional role_id claim for our app
-                            new Claim(
-                                "role_id",
-                                roleId),
+            var credentials =
+                new SigningCredentials(
+                    key,
+                    SecurityAlgorithms.HmacSha256);
 
-                            // JWT subject
-                            new Claim(
-                                JwtRegisteredClaimNames.Sub,
-                                user.Id.ToString()),
+            var token =
+                new JwtSecurityToken(
+                    issuer: issuer,
+                    audience: audience,
+                    claims: claims,
+                    notBefore:
+                        DateTime.UtcNow,
+                    expires:
+                        DateTime.UtcNow.AddHours(8),
+                    signingCredentials:
+                        credentials);
 
-                            // JWT username
-                            new Claim(
-                                JwtRegisteredClaimNames.UniqueName,
-                                user.Username),
+            return new JwtSecurityTokenHandler()
+                .WriteToken(token);
+        }
 
-                            // JWT ID
-                            new Claim(
-                                JwtRegisteredClaimNames.Jti,
-                                Guid.NewGuid().ToString())
-                        };
+        // ============================================================
+        // CONNECTION STRING
+        // ============================================================
 
-                    if (!string.IsNullOrWhiteSpace(buid))
-                    {
-                        claims.Add(new Claim("BUID", buid!.Trim()));
-                    }
+        private string GetConnectionString()
+        {
+            var connectionString =
+                _configuration.GetConnectionString(
+                    "DefaultConnection");
 
-                    var key =
-                        new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtKey));
+            if (string.IsNullOrWhiteSpace(
+                connectionString))
+            {
+                throw new InvalidOperationException(
+                    "ConnectionStrings:DefaultConnection is missing.");
+            }
 
-                    var credentials =
-                        new SigningCredentials(
-                            key,
-                            SecurityAlgorithms.HmacSha256);
-
-                    var token =
-                        new JwtSecurityToken(
-                            issuer: issuer,
-                            audience: audience,
-                            claims: claims,
-                            notBefore: DateTime.UtcNow,
-                            expires:
-                                DateTime.UtcNow.AddHours(8),
-                            signingCredentials:
-                                credentials
-                        );
-
-                    return new JwtSecurityTokenHandler()
-                        .WriteToken(token);
-                }
-
-                private async Task<string?> GetUserBuidAsync(string username)
-                {
-                    if (string.IsNullOrWhiteSpace(username))
-                    {
-                        return null;
-                    }
-
-                    // Try to use the DbContext's connection first. Some SDK registrations
-                    // may not configure the connection string on the context's underlying
-                    // DbConnection, so fall back to creating a SqlConnection from
-                    // configuration when necessary.
-                    var dbConnection = _db.Database.GetDbConnection();
-                    var useExplicitSqlConnection = string.IsNullOrWhiteSpace(dbConnection.ConnectionString);
-
-                    if (!useExplicitSqlConnection)
-                    {
-                        // Use the DbContext's connection (do not dispose it here — DbContext owns it)
-                        var connection = dbConnection;
-
-                        if (connection.State != ConnectionState.Open)
-                        {
-                            await connection.OpenAsync();
-                        }
-
-                        await using var command = connection.CreateCommand();
-
-                        command.CommandText = @"
-                            SELECT TOP 1 BUID
-                            FROM dbo.HH_SA_UserBUPermissions
-                            WHERE LOWER(UserID) = LOWER(@user)
-                            ";
-
-                        var param = command.CreateParameter();
-                        param.ParameterName = "@user";
-                        param.Value = username.Trim();
-                        command.Parameters.Add(param);
-
-                        await using var reader = await command.ExecuteReaderAsync();
-
-                        if (await reader.ReadAsync())
-                        {
-                            return reader.IsDBNull(0) ? null : reader.GetString(0).Trim();
-                        }
-
-                        // Fallback: pick a default BU from HH_SA_BU
-                        reader.Dispose();
-                        command.Parameters.Clear();
-
-                        command.CommandText = @"
-                            SELECT TOP 1 BUID
-                            FROM dbo.HH_SA_BU
-                            ORDER BY BUID
-                            ";
-
-                        await using var reader2 = await command.ExecuteReaderAsync();
-
-                        if (await reader2.ReadAsync())
-                        {
-                            return reader2.IsDBNull(0) ? null : reader2.GetString(0).Trim();
-                        }
-
-                        return null;
-                    }
-                    else
-                    {
-                        var connStr = _configuration.GetConnectionString("DefaultConnection");
-
-                        if (string.IsNullOrWhiteSpace(connStr))
-                        {
-                            // No connection string available to create a fallback connection.
-                            return null;
-                        }
-
-                        await using var connection = new SqlConnection(connStr);
-                        await connection.OpenAsync();
-
-                        await using var command = connection.CreateCommand();
-
-                        command.CommandText = @"
-                            SELECT TOP 1 BUID
-                            FROM dbo.HH_SA_UserBUPermissions
-                            WHERE LOWER(UserID) = LOWER(@user)
-                            ";
-
-                        var param = command.CreateParameter();
-                        param.ParameterName = "@user";
-                        param.Value = username.Trim();
-                        command.Parameters.Add(param);
-
-                        await using var reader = await command.ExecuteReaderAsync();
-
-                        if (await reader.ReadAsync())
-                        {
-                            return reader.IsDBNull(0) ? null : reader.GetString(0).Trim();
-                        }
-
-                        // Fallback: pick a default BU from HH_SA_BU
-                        command.Parameters.Clear();
-                        command.CommandText = @"
-                            SELECT TOP 1 BUID
-                            FROM dbo.HH_SA_BU
-                            ORDER BY BUID
-                            ";
-
-                        await using var reader2 = await command.ExecuteReaderAsync();
-
-                        if (await reader2.ReadAsync())
-                        {
-                            return reader2.IsDBNull(0) ? null : reader2.GetString(0).Trim();
-                        }
-
-                        return null;
-                    }
-                }
+            return connectionString;
+        }
     }
 
     // ================================================================
     // ROLE DTO
     // ================================================================
 
-    public sealed class RoleOption
+    public class RoleOption
     {
-        public string RoleID { get; set; } = string.Empty;
+        public string RoleID { get; set; } =
+            string.Empty;
 
-        public string Description { get; set; } = string.Empty;
+        public string Description { get; set; } =
+            string.Empty;
     }
 }

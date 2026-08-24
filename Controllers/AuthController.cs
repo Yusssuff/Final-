@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Data;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -7,6 +8,7 @@ using Final_Task.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.IdentityModel.Tokens;
@@ -18,12 +20,8 @@ namespace Final_Task.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _db;
-
-        private readonly IPasswordHasher<User>
-            _passwordHasher;
-
-        private readonly IConfiguration
-            _configuration;
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IConfiguration _configuration;
 
         public AuthController(
             AppDbContext db,
@@ -35,9 +33,60 @@ namespace Final_Task.Controllers
             _configuration = configuration;
         }
 
-        // =========================================
+        // ============================================================
+        // GET ROLES
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetRoles()
+        {
+            var roles = new List<RoleOption>();
+
+            await using var connection =
+                _db.Database.GetDbConnection();
+
+            if (connection.State != ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
+
+            await using var command =
+                connection.CreateCommand();
+
+            command.CommandText = """
+                SELECT
+                    RoleID,
+                    COALESCE(
+                        NULLIF(Description, ''),
+                        RoleID
+                    ) AS Description
+                FROM dbo.HH_SA_Roles
+                ORDER BY Description;
+                """;
+
+            await using var reader =
+                await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                roles.Add(
+                    new RoleOption
+                    {
+                        RoleID =
+                            reader.GetString(0).Trim(),
+
+                        Description =
+                            reader.GetString(1).Trim()
+                    });
+            }
+
+            return Ok(roles);
+        }
+
+        // ============================================================
         // REGISTER
-        // =========================================
+        // ============================================================
 
         [AllowAnonymous]
         [HttpPost("register")]
@@ -48,33 +97,29 @@ namespace Final_Task.Controllers
             {
                 return BadRequest(new
                 {
-                    message =
-                        "Request body is required."
+                    message = "Request body is required."
                 });
             }
 
             var username =
                 request.Username?.Trim();
 
-            var roleName =
+            var requestedRole =
                 request.Role?.Trim();
 
             if (string.IsNullOrWhiteSpace(username))
             {
                 return BadRequest(new
                 {
-                    message =
-                        "Username is required."
+                    message = "Username is required."
                 });
             }
 
-            if (string.IsNullOrWhiteSpace(
-                request.Password))
+            if (string.IsNullOrWhiteSpace(request.Password))
             {
                 return BadRequest(new
                 {
-                    message =
-                        "Password is required."
+                    message = "Password is required."
                 });
             }
 
@@ -107,16 +152,17 @@ namespace Final_Task.Controllers
                 });
             }
 
-            if (string.IsNullOrWhiteSpace(roleName))
+            if (string.IsNullOrWhiteSpace(requestedRole))
             {
                 return BadRequest(new
                 {
-                    message =
-                        "Role is required."
+                    message = "Role is required."
                 });
             }
 
-            // Check if username already exists.
+            // --------------------------------------------------------
+            // Check username
+            // --------------------------------------------------------
 
             var exists =
                 await _db.Users.AnyAsync(
@@ -126,37 +172,42 @@ namespace Final_Task.Controllers
             {
                 return Conflict(new
                 {
-                    message =
-                        "Username already exists."
+                    message = "Username already exists."
                 });
             }
 
-            // Find role by name.
-            // The frontend sends "Admin" or "User",
-            // NOT RoleId.
+            // --------------------------------------------------------
+            // Find the selected role in SalesBuzz
+            // HH_SA_Roles
+            // --------------------------------------------------------
 
             var role =
-                await _db.Roles
-                    .FirstOrDefaultAsync(
-                        r => r.Name == roleName);
+                await FindRoleAsync(requestedRole);
 
             if (role == null)
             {
                 return BadRequest(new
                 {
                     message =
-                        "Role not found."
+                        "Selected role does not exist."
                 });
             }
 
-            // Create user.
+            // --------------------------------------------------------
+            // Create application user
+            //
+            // IMPORTANT:
+            // Users.Role stores the SalesBuzz RoleID.
+            // Example:
+            //
+            // User -> user
+            // Admin -> admin
+            // --------------------------------------------------------
 
             var user = new User
             {
                 Username = username,
-
-                // RoleId is assigned internally.
-                RoleId = role.Id
+                Role = role.RoleID
             };
 
             user.PasswordHash =
@@ -176,15 +227,19 @@ namespace Final_Task.Controllers
                 user = new
                 {
                     id = user.Id,
-                    username = user.Username,
-                    role = role.Name
+
+                    username =
+                        user.Username,
+
+                    role =
+                        role.Description
                 }
             });
         }
 
-        // =========================================
+        // ============================================================
         // LOGIN
-        // =========================================
+        // ============================================================
 
         [AllowAnonymous]
         [HttpPost("login")]
@@ -203,11 +258,8 @@ namespace Final_Task.Controllers
             var username =
                 request.Username?.Trim();
 
-            if (
-                string.IsNullOrWhiteSpace(username)
-                ||
-                string.IsNullOrWhiteSpace(
-                    request.Password))
+            if (string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(request.Password))
             {
                 return Unauthorized(new
                 {
@@ -216,13 +268,12 @@ namespace Final_Task.Controllers
                 });
             }
 
-            // Load User + Role + Permissions.
+            // --------------------------------------------------------
+            // Find user
+            // --------------------------------------------------------
 
             var user =
                 await _db.Users
-                    .Include(u => u.Role)
-                    .ThenInclude(
-                        r => r!.RolePermissions)
                     .FirstOrDefaultAsync(
                         u => u.Username == username);
 
@@ -235,26 +286,17 @@ namespace Final_Task.Controllers
                 });
             }
 
-            if (user.Role == null)
-            {
-                return Unauthorized(new
-                {
-                    message =
-                        "User role is not configured."
-                });
-            }
-
-            // Verify password.
+            // --------------------------------------------------------
+            // Verify password
+            // --------------------------------------------------------
 
             var passwordResult =
-                _passwordHasher
-                    .VerifyHashedPassword(
-                        user,
-                        user.PasswordHash,
-                        request.Password);
+                _passwordHasher.VerifyHashedPassword(
+                    user,
+                    user.PasswordHash,
+                    request.Password);
 
-            if (
-                passwordResult ==
+            if (passwordResult ==
                 PasswordVerificationResult.Failed)
             {
                 return Unauthorized(new
@@ -264,24 +306,53 @@ namespace Final_Task.Controllers
                 });
             }
 
-            // Generate JWT.
+            // --------------------------------------------------------
+            // Validate user's SalesBuzz role
+            // --------------------------------------------------------
 
-            var token =
-                GenerateToken(user);
+            if (string.IsNullOrWhiteSpace(user.Role))
+            {
+                return Unauthorized(new
+                {
+                    message =
+                        "User role is not configured."
+                });
+            }
 
-            // Return permissions to frontend.
+            var role =
+                await FindRoleAsync(user.Role);
 
-            var permissions =
-                user.Role.RolePermissions
-                    .Select(p => new
-                    {
-                        operation =
-                            p.Operation,
+            if (role == null)
+            {
+                return Unauthorized(new
+                {
+                    message =
+                        "User role does not exist."
+                });
+            }
 
-                        permission =
-                            p.Permission.ToString()
-                    })
-                    .ToList();
+            // --------------------------------------------------------
+            // Generate JWT
+            //
+            // IMPORTANT:
+            // SalesBuzz CurrentBUClass.GetUserRoleID()
+            // reads ClaimTypes.Role.
+            //
+            // Therefore this must contain:
+            //
+            // admin
+            // or
+            // user
+            //
+            // NOT the display name.
+            // --------------------------------------------------------
+
+            var buid = await GetUserBuidAsync(user.Username);
+                        var token =
+                            GenerateToken(
+                                user,
+                                role.RoleID,
+                                buid);
 
             return Ok(new
             {
@@ -304,16 +375,17 @@ namespace Final_Task.Controllers
                         user.Username,
 
                     role =
-                        user.Role.Name
-                },
+                        role.Description,
 
-                permissions
+                    roleId =
+                        role.RoleID
+                }
             });
         }
 
-        // =========================================
-        // ME
-        // =========================================
+        // ============================================================
+        // CURRENT USER
+        // ============================================================
 
         [Authorize]
         [HttpGet("me")]
@@ -339,133 +411,251 @@ namespace Final_Task.Controllers
             });
         }
 
-        // =========================================
-        // GET ROLES
-        // =========================================
+        // ============================================================
+        // FIND SALESBUZZ ROLE
+        // ============================================================
 
-        [AllowAnonymous]
-        [HttpGet("roles")]
-        public async Task<IActionResult> GetRoles()
+        private async Task<RoleOption?> FindRoleAsync(
+            string value)
         {
-            var roles =
-                await _db.Roles
-                    .OrderBy(r => r.Name)
-                    .Select(r => new
-                    {
-                        id = r.Id,
-                        name = r.Name
-                    })
-                    .ToListAsync();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
 
-            return Ok(roles);
+            await using var connection =
+                _db.Database.GetDbConnection();
+
+            if (connection.State != ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
+
+            await using var command =
+                connection.CreateCommand();
+
+            command.CommandText = """
+                SELECT TOP 1
+                    RoleID,
+                    COALESCE(
+                        NULLIF(Description, ''),
+                        RoleID
+                    ) AS Description
+                FROM dbo.HH_SA_Roles
+                WHERE
+                    LOWER(RoleID) = LOWER(@value)
+                    OR LOWER(Description) = LOWER(@value)
+                    OR LOWER(DescriptionA) = LOWER(@value);
+                """;
+
+            var parameter =
+                command.CreateParameter();
+
+            parameter.ParameterName =
+                "@value";
+
+            parameter.Value =
+                value.Trim();
+
+            command.Parameters.Add(parameter);
+
+            await using var reader =
+                await command.ExecuteReaderAsync();
+
+            if (!await reader.ReadAsync())
+            {
+                return null;
+            }
+
+            return new RoleOption
+            {
+                RoleID =
+                    reader.GetString(0).Trim(),
+
+                Description =
+                    reader.IsDBNull(1)
+                        ? reader.GetString(0).Trim()
+                        : reader.GetString(1).Trim()
+            };
         }
 
-        // =========================================
+        // ============================================================
         // GENERATE JWT
-        // =========================================
+        // ============================================================
 
-        private string GenerateToken(User user)
-        {
-            var jwtKey =
-                _configuration["JWT:Key"];
-
-            var issuer =
-                _configuration["JWT:ValidIssuer"];
-
-            var audience =
-                _configuration["JWT:ValidAudience"];
-
-            if (string.IsNullOrWhiteSpace(jwtKey))
-            {
-                throw new InvalidOperationException(
-                    "JWT:Key is missing."
-                );
-            }
-
-            if (string.IsNullOrWhiteSpace(issuer))
-            {
-                throw new InvalidOperationException(
-                    "JWT:ValidIssuer is missing."
-                );
-            }
-
-            if (string.IsNullOrWhiteSpace(audience))
-            {
-                throw new InvalidOperationException(
-                    "JWT:ValidAudience is missing."
-                );
-            }
-
-            // Role object -> role NAME string.
-
-            var roleName =
-                user.Role?.Name
-                ?? string.Empty;
-
-            var claims =
-                new List<System.Security.Claims.Claim>
+        private string GenerateToken(
+            User user,
+                    string roleId,
+                    string? buid = null)
                 {
-                    new System.Security.Claims.Claim(
-                        ClaimTypes.NameIdentifier,
-                        user.Id.ToString()
-                    ),
+                    var jwtKey =
+                        _configuration["JWT:Key"];
 
-                    new System.Security.Claims.Claim(
-                        ClaimTypes.Name,
-                        user.Username
-                    ),
+                    var issuer =
+                        _configuration["JWT:ValidIssuer"];
 
-                    new System.Security.Claims.Claim(
-                        ClaimTypes.Role,
-                        roleName
-                    ),
+                    var audience =
+                        _configuration["JWT:ValidAudience"];
 
-                    new System.Security.Claims.Claim(
-                        "role_id",
-                        user.RoleId.ToString()
-                    ),
+                    if (string.IsNullOrWhiteSpace(jwtKey))
+                    {
+                        throw new InvalidOperationException(
+                            "JWT:Key is missing."
+                        );
+                    }
 
-                    new System.Security.Claims.Claim(
-                        JwtRegisteredClaimNames.Sub,
-                        user.Id.ToString()
-                    ),
+                    if (string.IsNullOrWhiteSpace(issuer))
+                    {
+                        throw new InvalidOperationException(
+                            "JWT:ValidIssuer is missing."
+                        );
+                    }
 
-                    new System.Security.Claims.Claim(
-                        JwtRegisteredClaimNames.UniqueName,
-                        user.Username
-                    ),
+                    if (string.IsNullOrWhiteSpace(audience))
+                    {
+                        throw new InvalidOperationException(
+                            "JWT:ValidAudience is missing."
+                        );
+                    }
 
-                    new System.Security.Claims.Claim(
-                        JwtRegisteredClaimNames.Jti,
-                        Guid.NewGuid().ToString()
-                    )
-                };
+                    var claims =
+                        new List<Claim>
+                        {
+                            // User ID
+                            new Claim(
+                                ClaimTypes.NameIdentifier,
+                                user.Id.ToString()),
 
-            var key =
-                new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtKey)
-                );
+                            // Username
+                            new Claim(
+                                ClaimTypes.Name,
+                                user.Username),
 
-            var credentials =
-                new SigningCredentials(
-                    key,
-                    SecurityAlgorithms.HmacSha256
-                );
+                            // IMPORTANT:
+                            // SalesBuzz reads this claim
+                            // to determine the user's role.
+                            new Claim(
+                                ClaimTypes.Role,
+                                roleId),
 
-            var token =
-                new JwtSecurityToken(
-                    issuer: issuer,
-                    audience: audience,
-                    claims: claims,
-                    notBefore: DateTime.UtcNow,
-                    expires:
-                        DateTime.UtcNow.AddHours(8),
-                    signingCredentials:
-                        credentials
-                );
+                            // Optional role_id claim for our app
+                            new Claim(
+                                "role_id",
+                                roleId),
 
-            return new JwtSecurityTokenHandler()
-                .WriteToken(token);
-        }
+                            // JWT subject
+                            new Claim(
+                                JwtRegisteredClaimNames.Sub,
+                                user.Id.ToString()),
+
+                            // JWT username
+                            new Claim(
+                                JwtRegisteredClaimNames.UniqueName,
+                                user.Username),
+
+                            // JWT ID
+                            new Claim(
+                                JwtRegisteredClaimNames.Jti,
+                                Guid.NewGuid().ToString())
+                        };
+
+                    if (!string.IsNullOrWhiteSpace(buid))
+                    {
+                        claims.Add(new Claim("BUID", buid!.Trim()));
+                    }
+
+                    var key =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwtKey));
+
+                    var credentials =
+                        new SigningCredentials(
+                            key,
+                            SecurityAlgorithms.HmacSha256);
+
+                    var token =
+                        new JwtSecurityToken(
+                            issuer: issuer,
+                            audience: audience,
+                            claims: claims,
+                            notBefore: DateTime.UtcNow,
+                            expires:
+                                DateTime.UtcNow.AddHours(8),
+                            signingCredentials:
+                                credentials
+                        );
+
+                    return new JwtSecurityTokenHandler()
+                        .WriteToken(token);
+                }
+
+                private async Task<string?> GetUserBuidAsync(string username)
+                {
+                    if (string.IsNullOrWhiteSpace(username))
+                    {
+                        return null;
+                    }
+
+                    await using var connection =
+                        _db.Database.GetDbConnection();
+
+                    if (connection.State != ConnectionState.Open)
+                    {
+                        await connection.OpenAsync();
+                    }
+
+                    await using var command =
+                        connection.CreateCommand();
+
+                    command.CommandText = @"
+                        SELECT TOP 1 BUID
+                        FROM dbo.HH_SA_UserBUPermissions
+                        WHERE LOWER(UserID) = LOWER(@user)
+                        ";
+
+                    var param = command.CreateParameter();
+                    param.ParameterName = "@user";
+                    param.Value = username.Trim();
+                    command.Parameters.Add(param);
+
+                    await using var reader =
+                        await command.ExecuteReaderAsync();
+
+                    if (await reader.ReadAsync())
+                    {
+                        return reader.IsDBNull(0) ? null : reader.GetString(0).Trim();
+                    }
+
+                    // Fallback: pick a default BU from HH_SA_BU
+                    reader.Dispose();
+                    command.Parameters.Clear();
+
+                    command.CommandText = @"
+                        SELECT TOP 1 BUID
+                        FROM dbo.HH_SA_BU
+                        ORDER BY BUID
+                        ";
+
+                    await using var reader2 =
+                        await command.ExecuteReaderAsync();
+
+                    if (await reader2.ReadAsync())
+                    {
+                        return reader2.IsDBNull(0) ? null : reader2.GetString(0).Trim();
+                    }
+
+                    return null;
+                }
+    }
+
+    // ================================================================
+    // ROLE DTO
+    // ================================================================
+
+    public sealed class RoleOption
+    {
+        public string RoleID { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
     }
 }

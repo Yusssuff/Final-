@@ -4,6 +4,9 @@ using SalesBuzz.Shared.Authorization;
 using SalesBuzz.Shared.Data;
 using SalesBuzz.Shared.Filters;
 using SalesBuzz.Shared.Middleware;
+using System;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,11 +76,32 @@ app.Run();
 public sealed class SalesBuzzPermissionService
 {
     private readonly IPermissions _permissions;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public SalesBuzzPermissionService(
-        IPermissions permissions)
+        IPermissions permissions,
+        IHttpContextAccessor httpContextAccessor)
     {
         _permissions = permissions;
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    private string CurrentUserRole()
+    {
+        try
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                return user.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
+            }
+        }
+        catch
+        {
+            // ignore and fall back to permissions provider
+        }
+
+        return string.Empty;
     }
 
     public bool HasPermission(
@@ -89,6 +113,37 @@ public sealed class SalesBuzzPermissionService
             return false;
         }
 
+        // First apply simple role-based rules for this app's needs.
+        var role = CurrentUserRole();
+
+        if (!string.IsNullOrWhiteSpace(role))
+        {
+            if (role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                // Admin has all permissions
+                return true;
+            }
+
+            if (role.Equals("User", StringComparison.OrdinalIgnoreCase))
+            {
+                // Users are read-only for Products, but can manage Orders
+                if (operation.Equals("Products", StringComparison.OrdinalIgnoreCase))
+                {
+                    return permission == PermissionKind.Read;
+                }
+
+                if (operation.Equals("Orders", StringComparison.OrdinalIgnoreCase))
+                {
+                    // allow full CRUD on Orders for normal users
+                    return permission == PermissionKind.Create ||
+                           permission == PermissionKind.Update ||
+                           permission == PermissionKind.Delete ||
+                           permission == PermissionKind.Read;
+                }
+            }
+        }
+
+        // Fall back to the configured permissions provider
         return _permissions.IsValidOperationPermission(
             operation,
             permission
@@ -102,6 +157,32 @@ public sealed class SalesBuzzPermissionService
         if (string.IsNullOrWhiteSpace(operation))
         {
             return false;
+        }
+
+        var role = CurrentUserRole();
+
+        if (!string.IsNullOrWhiteSpace(role))
+        {
+            if (role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (role.Equals("User", StringComparison.OrdinalIgnoreCase))
+            {
+                if (operation.Equals("Products", StringComparison.OrdinalIgnoreCase))
+                {
+                    return permission == PermissionKind.Read;
+                }
+
+                if (operation.Equals("Orders", StringComparison.OrdinalIgnoreCase))
+                {
+                    return permission == PermissionKind.Create ||
+                           permission == PermissionKind.Update ||
+                           permission == PermissionKind.Delete ||
+                           permission == PermissionKind.Read;
+                }
+            }
         }
 
         return _permissions.IsValidOperationPermission(

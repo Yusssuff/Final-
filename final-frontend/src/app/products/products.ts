@@ -29,6 +29,8 @@ import {
   ProductsDataSource
 } from './products.data-source';
 
+import { AuthService } from '../auth/auth.service';
+
 @Component({
   selector: 'app-products',
 
@@ -42,7 +44,7 @@ import {
 
   templateUrl: './products.html',
 
-styleUrl: './products.css',
+styleUrls: ['./products.css'],
 
 providers: [DecimalPipe]
 })
@@ -192,8 +194,20 @@ export class Products
 
   constructor(
     public readonly dataSource:
-      ProductsDataSource
+      ProductsDataSource,
+    private readonly auth: AuthService
   ) {}
+
+  get isAdmin(): boolean {
+    return this.auth.isAdmin();
+  }
+
+  // Template helper: returns the changeSet or null typed as any so the template
+  // can pass null to BI-Grid to disable edit UI for non-admins without
+  // triggering Angular's strict template type checks.
+  get changeSetBinding(): any {
+    return this.isAdmin ? this.changeSet : null;
+  }
 
 ngOnInit(): void {
   this.dataSource.read();

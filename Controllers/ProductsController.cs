@@ -39,15 +39,31 @@ namespace Final_Task.Controllers
             var tokenBuid =
                 User.FindFirst("BUID")?.Value;
 
-            if (string.IsNullOrWhiteSpace(currentBuid) ||
+            if (string.IsNullOrWhiteSpace(currentBuid) &&
                 string.IsNullOrWhiteSpace(tokenBuid))
             {
                 return Forbid();
             }
 
+            var effectiveCurrentBuid =
+                string.IsNullOrWhiteSpace(currentBuid)
+                    ? tokenBuid
+                    : currentBuid;
+
+            var effectiveTokenBuid =
+                string.IsNullOrWhiteSpace(tokenBuid)
+                    ? currentBuid
+                    : tokenBuid;
+
+            if (string.IsNullOrWhiteSpace(effectiveCurrentBuid) ||
+                string.IsNullOrWhiteSpace(effectiveTokenBuid))
+            {
+                return Forbid();
+            }
+
             if (!string.Equals(
-                    currentBuid.Trim(),
-                    tokenBuid.Trim(),
+                    effectiveCurrentBuid.Trim(),
+                    effectiveTokenBuid.Trim(),
                     StringComparison.OrdinalIgnoreCase))
             {
                 return Forbid();

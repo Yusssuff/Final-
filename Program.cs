@@ -1,9 +1,10 @@
-using Final_Task.Data;
+﻿using Final_Task.Data;
 using Final_Task.Services;
 
 using Microsoft.AspNetCore.Identity;
 using SalesBuzz.Shared.Authorization;
 using SalesBuzz.Shared.Data;
+using SalesBuzz.Shared.Helpers;
 using SalesBuzz.Shared.Middleware;
 using Microsoft.EntityFrameworkCore;
 
@@ -78,6 +79,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAngularApp");
 
+app.UseStaticHttpContext();
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -89,3 +92,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

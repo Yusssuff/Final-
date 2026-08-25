@@ -370,7 +370,15 @@ namespace Final_Task.Controllers
 
             var buid =
                 await GetUserBuidAsync(
-                    user.Id);
+                    user.Id)
+                ?? await GetDefaultBuidAsync();
+
+            if (!string.IsNullOrWhiteSpace(buid))
+            {
+                await AssignUserToBuidAsync(
+                    user.Id,
+                    buid);
+            }
 
             // --------------------------------------------------------
             // Generate JWT

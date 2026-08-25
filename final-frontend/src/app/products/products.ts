@@ -15,12 +15,15 @@ import { OrderService } from '../orders/order.service';
 import { Product } from './products.model';
 import { ProductsService } from './products.service';
 
+import { DialogModule } from '@progress/kendo-angular-dialog';
+import { QrService } from '../shared/qr.service';
+
 @Component({
   selector: 'app-products',
 
   standalone: true,
 
-  imports: [CommonModule, FormsModule, BIModulesModule],
+  imports: [CommonModule, FormsModule, BIModulesModule, DialogModule],
 
   templateUrl: './products.html',
 
@@ -133,12 +136,12 @@ export class Products implements OnInit {
     private readonly auth: AuthService,
     private readonly productsService: ProductsService,
     private readonly orderService: OrderService,
+    private readonly qrService: QrService,
   ) {}
 
   get isAdmin(): boolean {
     return this.auth.isAdmin();
   }
-
 
   get changeSetBinding(): any {
     return this.isAdmin ? this.changeSet : null;
@@ -310,27 +313,72 @@ export class Products implements OnInit {
         quantity: this.orderQuantity,
       })
       .subscribe({
-        next: (order) => {
+        next: async (order) => {
           this.showQuickOrderModal = false;
 
           const orderUrl = `${window.location.origin}/order-details?id=${order.id}`;
 
-          this.latestOrderSummary = {
-            id: order.id,
-            productName: product.name,
-            quantity: order.quantity,
-            totalPrice: order.totalPrice,
-            orderDate: order.orderDate,
-            qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(orderUrl)}`,
-          };
+          try {
+            const qrDataUrl = await this.qrService.toDataUrl(orderUrl, {
+              width: 300,
+            });
 
-          this.showQrModal = true;
+            this.latestOrderSummary = {
+              id: order.id,
+              productName: product.name,
+              quantity: order.quantity,
+              totalPrice: order.totalPrice,
+              orderDate: order.orderDate,
+              qrUrl: qrDataUrl,
+            };
+
+            this.showQrModal = true;
+          } catch (qrErr) {
+            console.error(
+              'QR generation failed, falling back to external service',
+              qrErr,
+            );
+
+            this.latestOrderSummary = {
+              id: order.id,
+              productName: product.name,
+              quantity: order.quantity,
+              totalPrice: order.totalPrice,
+              orderDate: order.orderDate,
+              qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(orderUrl)}`,
+            };
+
+            this.showQrModal = true;
+          }
         },
         error: (err) => {
           console.error(err);
           alert('Failed to create order.');
         },
       });
+  }
+
+  printQr(): void {
+    const dataUrl = this.latestOrderSummary?.qrUrl;
+    if (!dataUrl) {
+      return;
+    }
+
+    const win = window.open('', '_blank', 'width=400,height=500');
+    if (!win) {
+      return;
+    }
+
+    win.document.write(`
+      <html><head><title>Print QR</title>
+      <style>body{text-align:center;margin:0;padding:20px;}img{max-width:100%;height:auto;}</style>
+      </head><body>
+      <img src="${dataUrl}" alt="Order QR" />
+      <script>window.onload = function(){ setTimeout(function(){ window.print(); }, 250); };</script>
+      </body></html>
+    `);
+
+    win.document.close();
   }
 
   closeQrModal(): void {

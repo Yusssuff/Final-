@@ -52,7 +52,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>{{ editingId ? 'Edit Product' : 'Add Product' }}</h2>
-        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">×</button>
+        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">ï¿½</button>
       </div>
 
       <div class="modal-body">
@@ -87,7 +87,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>Place quick order</h2>
-        <button type="button" class="close-btn" (click)="closeQuickOrderModal()" aria-label="Close">×</button>
+        <button type="button" class="close-btn" (click)="closeQuickOrderModal()" aria-label="Close">ï¿½</button>
       </div>
 
       <div class="modal-body">
@@ -116,31 +116,33 @@
     </div>
   </div>
 
-  <div *ngIf="showQrModal && latestOrderSummary" class="modal-backdrop">
-    <div class="modal-card qr">
-      <div class="modal-header">
-        <h2>Order created</h2>
-        <button type="button" class="close-btn" (click)="closeQrModal()" aria-label="Close">×</button>
-      </div>
+  <kendo-dialog *ngIf="showQrModal && latestOrderSummary" (close)="closeQrModal()" width="760">
+    <kendo-dialog-titlebar>
+      Order created
+    </kendo-dialog-titlebar>
 
-      <div class="qr-content">
+    <div class="qr-dialog">
+      <div class="qr-left">
         <div class="qr-image-wrap">
           <img [src]="latestOrderSummary.qrUrl" alt="Order QR code" class="qr-image" />
         </div>
-
-        <div class="qr-summary">
-          <div class="summary-item"><strong>Order ID:</strong> {{ latestOrderSummary.id }}</div>
-          <div class="summary-item"><strong>Product:</strong> {{ latestOrderSummary.productName }}</div>
-          <div class="summary-item"><strong>Quantity:</strong> {{ latestOrderSummary.quantity }}</div>
-          <div class="summary-item"><strong>Total:</strong> {{ latestOrderSummary.totalPrice | currency }}</div>
-          <div class="summary-item"><strong>Date:</strong> {{ latestOrderSummary.orderDate | date: 'medium' }}</div>
+        <div class="qr-small-actions">
+          <button kendoButton class="primary-btn" (click)="printQr()">Print</button>
+          <a kendoButton class="secondary-btn" [href]="latestOrderSummary.qrUrl" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Open QR</a>
         </div>
       </div>
 
-      <div class="qr-actions">
-        <button type="button" class="ghost-btn" (click)="closeQrModal()">Close</button>
-        <a [href]="latestOrderSummary.qrUrl" target="_blank" class="primary-btn" style="text-decoration:none; display:inline-flex;">Open QR</a>
+      <div class="qr-right">
+        <div class="summary-item"><strong>Order ID:</strong> {{ latestOrderSummary.id }}</div>
+        <div class="summary-item"><strong>Product:</strong> {{ latestOrderSummary.productName }}</div>
+        <div class="summary-item"><strong>Quantity:</strong> {{ latestOrderSummary.quantity }}</div>
+        <div class="summary-item"><strong>Total:</strong> {{ latestOrderSummary.totalPrice | currency }}</div>
+        <div class="summary-item"><strong>Date:</strong> {{ latestOrderSummary.orderDate | date: 'medium' }}</div>
+
+        <div style="margin-top:18px;">
+          <button kendoButton class="ghost-btn" (click)="closeQrModal()">Close</button>
+        </div>
       </div>
     </div>
-  </div>
+  </kendo-dialog>
 </div>

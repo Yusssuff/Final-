@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
@@ -25,13 +25,9 @@ export class ProductsService {
   getProducts(): Observable<Product[]> {
     const token = this.authService.getToken();
 
-    return this.http.get<Product[]>(this.baseUrl, {
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {},
-    });
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+
+    return this.http.get<Product[]>(this.baseUrl, { headers });
   }
 
   // -----------------------------------------
@@ -41,13 +37,9 @@ export class ProductsService {
   getProduct(id: number): Observable<Product> {
     const token = this.authService.getToken();
 
-    return this.http.get<Product>(`${this.baseUrl}/${id}`, {
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {},
-    });
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+
+    return this.http.get<Product>(`${this.baseUrl}/${id}`, { headers });
   }
 
   // -----------------------------------------
@@ -56,14 +48,9 @@ export class ProductsService {
 
   createProduct(request: CreateProductRequest): Observable<Product> {
     const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
 
-    return this.http.post<Product>(this.baseUrl, request, {
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {},
-    });
+    return this.http.post<Product>(this.baseUrl, request, { headers });
   }
 
   // -----------------------------------------

@@ -1,0 +1,49 @@
+﻿<div class="min-h-screen bg-[#080b12] px-4 py-8 text-white sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-3xl rounded-2xl border border-slate-700 bg-[#111620] p-6 shadow-xl">
+    <div class="mb-6 flex items-center justify-between gap-4">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-400">
+          Order Details
+        </p>
+        <h1 class="mt-2 text-3xl font-semibold">Order #{{ order?.id ?? '—' }}</h1>
+      </div>
+
+      <a
+        routerLink="/products"
+        class="rounded-xl border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 hover:border-indigo-400 hover:text-white"
+      >
+        Back to products
+      </a>
+    </div>
+
+    <div *ngIf="isLoading" class="text-slate-300">Loading order details...</div>
+
+    <div *ngIf="error" class="rounded-xl border border-red-500/60 bg-red-500/10 p-4 text-red-200">
+      {{ error }}
+    </div>
+
+    <div *ngIf="order && !isLoading" class="space-y-5">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="rounded-xl bg-slate-800 p-4">
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Product</p>
+          <p class="mt-2 text-xl font-semibold">{{ order.product?.name ?? 'Unknown product' }}</p>
+        </div>
+
+        <div class="rounded-xl bg-slate-800 p-4">
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Quantity</p>
+          <p class="mt-2 text-xl font-semibold">{{ order.quantity }}</p>
+        </div>
+
+        <div class="rounded-xl bg-slate-800 p-4">
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Total</p>
+          <p class="mt-2 text-xl font-semibold">{{ order.totalPrice | currency }}</p>
+        </div>
+
+        <div class="rounded-xl bg-slate-800 p-4">
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Order date</p>
+          <p class="mt-2 text-xl font-semibold">{{ order.orderDate | date: 'medium' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

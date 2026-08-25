@@ -16,6 +16,10 @@ export class AppComponent {
     return this.auth.isLoggedIn();
   }
 
+  get isAuthPage(): boolean {
+    return this.router.url.startsWith('/auth');
+  }
+
   get username(): string | null {
     return this.auth.getUser()?.username ?? null;
   }

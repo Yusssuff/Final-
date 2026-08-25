@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using SalesBuzz.Shared.Authorization;
+using SalesBuzz.Shared.Data;
 
 namespace Final_Task.Controllers
 {
@@ -18,13 +19,41 @@ namespace Final_Task.Controllers
 
         private readonly AppDbContext _db;
         private readonly SalesBuzzPermissionService _permissions;
+        private readonly ICurrentBUContext _currentBUContext;
 
         public ProductsController(
             AppDbContext db,
-            SalesBuzzPermissionService permissions)
+            SalesBuzzPermissionService permissions,
+            ICurrentBUContext currentBUContext)
         {
             _db = db;
             _permissions = permissions;
+            _currentBUContext = currentBUContext;
+        }
+
+        private IActionResult? ValidateCurrentBuidAccess()
+        {
+            var currentBuid =
+                _currentBUContext.GetUserBUID();
+
+            var tokenBuid =
+                User.FindFirst("BUID")?.Value;
+
+            if (string.IsNullOrWhiteSpace(currentBuid) ||
+                string.IsNullOrWhiteSpace(tokenBuid))
+            {
+                return Forbid();
+            }
+
+            if (!string.Equals(
+                    currentBuid.Trim(),
+                    tokenBuid.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return Forbid();
+            }
+
+            return null;
         }
 
         // =========================================================
@@ -39,6 +68,14 @@ namespace Final_Task.Controllers
                 SalesBuzz.Shared.Filters.PermissionKind.Read))
             {
                 return Forbid();
+            }
+
+            var buAccessResult =
+                ValidateCurrentBuidAccess();
+
+            if (buAccessResult != null)
+            {
+                return buAccessResult;
             }
 
             var products =
@@ -61,6 +98,14 @@ namespace Final_Task.Controllers
                 SalesBuzz.Shared.Filters.PermissionKind.Read))
             {
                 return Forbid();
+            }
+
+            var buAccessResult =
+                ValidateCurrentBuidAccess();
+
+            if (buAccessResult != null)
+            {
+                return buAccessResult;
             }
 
             var product =
@@ -91,6 +136,14 @@ namespace Final_Task.Controllers
                 SalesBuzz.Shared.Filters.PermissionKind.Create))
             {
                 return Forbid();
+            }
+
+            var buAccessResult =
+                ValidateCurrentBuidAccess();
+
+            if (buAccessResult != null)
+            {
+                return buAccessResult;
             }
 
             if (product == null)
@@ -172,6 +225,14 @@ namespace Final_Task.Controllers
                 return Forbid();
             }
 
+            var buAccessResult =
+                ValidateCurrentBuidAccess();
+
+            if (buAccessResult != null)
+            {
+                return buAccessResult;
+            }
+
             if (product == null)
             {
                 return BadRequest(new
@@ -248,6 +309,14 @@ namespace Final_Task.Controllers
                 SalesBuzz.Shared.Filters.PermissionKind.Delete))
             {
                 return Forbid();
+            }
+
+            var buAccessResult =
+                ValidateCurrentBuidAccess();
+
+            if (buAccessResult != null)
+            {
+                return buAccessResult;
             }
 
             var existingProduct =

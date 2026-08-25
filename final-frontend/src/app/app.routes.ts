@@ -10,6 +10,10 @@ import {
   authGuard
 } from './auth/auth.guard';
 
+import {
+  OrderDetailComponent
+} from './orders/order-detail';
+
 export const routes: Routes = [
 
   {
@@ -32,6 +36,12 @@ export const routes: Routes = [
         .then(
           m => m.Products
         )
+  },
+
+  {
+    path: 'order-details',
+    canActivate: [authGuard],
+    component: OrderDetailComponent
   },
 
   {

@@ -1,4 +1,4 @@
-<header class="flex items-center justify-between p-4 bg-[#0b1220] text-white">
+<header *ngIf="!isAuthPage" class="flex items-center justify-between p-4 bg-[#0b1220] text-white">
   <div class="flex items-center gap-3">
     <a routerLink="/products" class="text-lg font-semibold">SalesBuzz</a>
   </div>

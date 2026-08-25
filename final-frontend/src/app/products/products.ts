@@ -11,6 +11,8 @@ import { ControlTypes, DataTypes, IChangeset, IColumns } from 'bi-interfaces';
 import { ProductsDataSource } from './products.data-source';
 
 import { AuthService } from '../auth/auth.service';
+import { OrderService } from '../orders/order.service';
+import { Product } from './products.model';
 import { ProductsService } from './products.service';
 
 @Component({
@@ -130,6 +132,7 @@ export class Products implements OnInit {
     public readonly dataSource: ProductsDataSource,
     private readonly auth: AuthService,
     private readonly productsService: ProductsService,
+    private readonly orderService: OrderService,
   ) {}
 
   get isAdmin(): boolean {
@@ -167,6 +170,25 @@ export class Products implements OnInit {
   // -----------------------------------------
 
   showModal = false;
+
+  showQuickOrderModal = false;
+
+  showQrModal = false;
+
+  quickOrderProducts: Product[] = [];
+
+  selectedProductId = 0;
+
+  orderQuantity = 1;
+
+  latestOrderSummary: {
+    id: number;
+    productName: string;
+    quantity: number;
+    totalPrice: number;
+    orderDate: string;
+    qrUrl: string;
+  } | null = null;
 
   editingId: number | null = null;
 
@@ -233,6 +255,87 @@ export class Products implements OnInit {
         alert('Failed to delete product');
       },
     });
+  }
+
+  openQuickOrderModal(): void {
+    this.selectedProductId = 0;
+    this.orderQuantity = 1;
+    this.quickOrderProducts = [];
+    this.showQuickOrderModal = true;
+
+    this.productsService.getProducts().subscribe({
+      next: (products) => {
+        this.quickOrderProducts = products;
+        if (products.length > 0) {
+          this.selectedProductId = products[0].id;
+        }
+      },
+      error: () => {
+        alert('Failed to load products for order creation');
+      },
+    });
+  }
+
+  closeQuickOrderModal(): void {
+    this.showQuickOrderModal = false;
+    this.selectedProductId = 0;
+    this.orderQuantity = 1;
+  }
+
+  submitQuickOrder(): void {
+    if (!this.selectedProductId || this.orderQuantity <= 0) {
+      alert('Please select a valid product and quantity.');
+      return;
+    }
+
+    const product = this.quickOrderProducts.find(
+      (item) => item.id === this.selectedProductId,
+    );
+
+    if (!product) {
+      alert('Selected product was not found.');
+      return;
+    }
+
+    if (this.orderQuantity > product.quantity) {
+      alert(
+        `Only ${product.quantity} units are available for ${product.name}.`,
+      );
+      return;
+    }
+
+    this.orderService
+      .createOrder({
+        productId: this.selectedProductId,
+        quantity: this.orderQuantity,
+      })
+      .subscribe({
+        next: (order) => {
+          this.showQuickOrderModal = false;
+
+          const orderUrl = `${window.location.origin}/order-details?id=${order.id}`;
+
+          this.latestOrderSummary = {
+            id: order.id,
+            productName: product.name,
+            quantity: order.quantity,
+            totalPrice: order.totalPrice,
+            orderDate: order.orderDate,
+            qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(orderUrl)}`,
+          };
+
+          this.showQrModal = true;
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Failed to create order.');
+        },
+      });
+  }
+
+  closeQrModal(): void {
+    this.showQrModal = false;
+    this.latestOrderSummary = null;
   }
 
   closeModal(): void {

@@ -39,29 +39,26 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${this.baseUrl}/login`, request).pipe(
       tap((response) => {
         localStorage.setItem(this.tokenKey, response.token);
-
         localStorage.setItem(this.userKey, JSON.stringify(response.user));
-
         this._currentUser.next(response.user);
       }),
     );
   }
 
   register(request: RegisterRequest): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(
-      `${this.baseUrl}/register`,
-      request,
-    );
+    return this.http.post<RegisterResponse>(`${this.baseUrl}/register`, request);
   }
 
   me(): Observable<MeResponse> {
     const token = this.getToken();
-
-    const headers = token
-      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-      : new HttpHeaders();
-
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
     return this.http.get<MeResponse>(`${this.baseUrl}/me`, { headers });
+  }
+
+  changePassword(payload: { currentPassword: string; newPassword: string; confirmPassword: string; }) {
+    const token = this.getToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+    return this.http.post(`${this.baseUrl}/change-password`, payload, { headers });
   }
 
   /**
@@ -103,9 +100,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
-
     localStorage.removeItem(this.userKey);
-
     this._currentUser.next(null);
   }
 
@@ -115,7 +110,6 @@ export class AuthService {
 
   private _readUserFromStorage(): AuthUser | null {
     const value = localStorage.getItem(this.userKey);
-
     if (!value) {
       return null;
     }
@@ -124,7 +118,6 @@ export class AuthService {
       return JSON.parse(value) as AuthUser;
     } catch {
       localStorage.removeItem(this.userKey);
-
       return null;
     }
   }

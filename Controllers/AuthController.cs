@@ -455,6 +455,62 @@ namespace Final_Task.Controllers
         }
 
         // ============================================================
+        // CHANGE PASSWORD
+        // ============================================================
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            if (request == null)
+            {
+                return BadRequest(new { message = "Request body is required." });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.CurrentPassword) || string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.ConfirmPassword))
+            {
+                return BadRequest(new { message = "All password fields are required." });
+            }
+
+            if (request.NewPassword.Length < 6)
+            {
+                return BadRequest(new { message = "New password must be at least 6 characters." });
+            }
+
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                return BadRequest(new { message = "New password and confirmation do not match." });
+            }
+
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "User identity is invalid." });
+            }
+
+            var user = await _db.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            var passwordResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword);
+
+            if (passwordResult == PasswordVerificationResult.Failed)
+            {
+                return BadRequest(new { message = "Current password is incorrect." });
+            }
+
+            user.PasswordHash = _passwordHasher.HashPassword(user, request.NewPassword);
+
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Password changed successfully." });
+        }
+
+        // ============================================================
         // FIND SALESBUZZ ROLE
         // ============================================================
 
@@ -837,6 +893,16 @@ namespace Final_Task.Controllers
     // ROLE DTO
     // ================================================================
 
+    public class ChangePasswordRequest
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+
+    // ================================================================
+    // ROLE DTO
+    // ================================================================
     public class RoleOption
     {
         public string RoleID { get; set; } =

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
 
 import { CommonModule, DecimalPipe } from '@angular/common';
 
@@ -143,9 +143,7 @@ export class Products implements OnInit {
     return this.auth.isAdmin();
   }
 
-  get changeSetBinding(): any {
-    return this.isAdmin ? this.changeSet : null;
-  }
+  get changeSetBinding(): any { return this.changeSet; }
 
   ngOnInit(): void {
     this.dataSource.read();
@@ -429,3 +427,5 @@ export class Products implements OnInit {
     }
   }
 }
+
+

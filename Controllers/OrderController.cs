@@ -102,6 +102,37 @@ namespace Final_Task.Controllers
             return Ok(orders);
         }
 
+                    // =========================================================
+                    // GET MY ORDERS
+                    // =========================================================
+
+                    [HttpGet("my")]
+                    public async Task<IActionResult> GetMyOrders()
+                    {
+                        if (!_permissions.HasPermission(
+                            "Orders",
+                            SalesBuzz.Shared.Filters.PermissionKind.Read))
+                        {
+                            return Forbid();
+                        }
+
+                        var buAccessResult = ValidateCurrentBuidAccess();
+                        if (buAccessResult != null) return buAccessResult;
+
+                        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                        if (!int.TryParse(userIdClaim, out var userId))
+                        {
+                            return Unauthorized(new { message = "User identity is invalid." });
+                        }
+
+                        var orders = await _db.Orders
+                            .Include(o => o.Product)
+                            .Where(o => o.UserId == userId)
+                            .ToListAsync();
+
+                        return Ok(orders);
+                    }
+
         // =========================================================
         // CREATE ORDER
         // =========================================================
@@ -254,6 +285,37 @@ namespace Final_Task.Controllers
             }
 
             return Ok(order);
+        }
+
+        // =========================================================
+        // GET MY ORDERS (only orders for the authenticated user)
+        // =========================================================
+
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyOrders()
+        {
+            // Validate BU access same as other endpoints
+            var buAccessResult = ValidateCurrentBuidAccess();
+
+            if (buAccessResult != null)
+            {
+                return buAccessResult;
+            }
+
+            // Get authenticated user id from JWT
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "User identity is invalid." });
+            }
+
+            var orders = await _db.Orders
+                .Include(o => o.Product)
+                .Where(o => o.UserId == userId)
+                .ToListAsync();
+
+            return Ok(orders);
         }
 
         // =========================================================

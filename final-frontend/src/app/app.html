@@ -7,7 +7,7 @@
     <a *ngIf="!isLoggedIn" routerLink="/auth" class="text-sm">Sign in</a>
 
     <div *ngIf="isLoggedIn" class="flex items-center gap-3">
-      <span class="text-sm">{{ username }}</span>
+      <a routerLink="/profile" class="text-sm hover:underline">{{ username }}</a>
       <button (click)="logout()" class="rounded px-3 py-1 bg-indigo-600 text-white text-sm">Logout</button>
     </div>
   </div>

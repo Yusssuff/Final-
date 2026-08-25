@@ -1,0 +1,101 @@
+<div class="min-h-screen p-6 bg-slate-900 text-slate-100">
+  <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Left column: Account + Security -->
+    <div class="md:col-span-1">
+      <div class="bg-slate-800 rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Account</h2>
+        <div class="space-y-3 text-sm text-slate-300">
+          <div class="flex justify-between">
+            <span class="font-medium text-slate-200">Username</span>
+            <span>{{ user?.username ?? me?.username ?? '—' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="font-medium text-slate-200">Role</span>
+            <span>{{ me?.role ?? user?.role ?? '—' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="font-medium text-slate-200">Business Unit</span>
+            <span>{{ me?.buid ?? '—' }}</span>
+          </div>
+        </div>
+
+        <hr class="my-4 border-slate-700" />
+
+        <h3 class="text-md font-semibold mb-2 text-slate-200">Security</h3>
+        <div class="space-y-3">
+          <label class="text-sm text-slate-300">Current password</label>
+          <input type="password" [(ngModel)]="currentPassword" class="w-full rounded-md bg-slate-700 border border-slate-600 px-3 py-2 text-slate-100" />
+
+          <label class="text-sm text-slate-300">New password</label>
+          <input type="password" [(ngModel)]="newPassword" class="w-full rounded-md bg-slate-700 border border-slate-600 px-3 py-2 text-slate-100" />
+
+          <label class="text-sm text-slate-300">Confirm new password</label>
+          <input type="password" [(ngModel)]="confirmPassword" class="w-full rounded-md bg-slate-700 border border-slate-600 px-3 py-2 text-slate-100" />
+
+          <div class="flex gap-2 mt-3">
+            <button (click)="changePassword()" [disabled]="changingPassword" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-sm font-semibold">Change password</button>
+            <div class="text-sm text-amber-400 self-center">{{ changePasswordMessage }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Orders -->
+    <div class="md:col-span-2">
+      <div class="bg-slate-800 rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-slate-100">My Orders</h2>
+          <div class="text-sm text-slate-400">Showing orders for your account</div>
+        </div>
+
+        <div *ngIf="loadingOrders" class="text-slate-300">Loading orders...</div>
+        <div *ngIf="error" class="text-red-400">{{ error }}</div>
+
+        <div *ngIf="!loadingOrders && orders?.length" class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-slate-400 text-left">
+                <th class="px-3 py-2">Order</th>
+                <th class="px-3 py-2">Product</th>
+                <th class="px-3 py-2">Qty</th>
+                <th class="px-3 py-2">Total</th>
+                <th class="px-3 py-2">Date</th>
+                <th class="px-3 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let o of orders" class="border-t border-slate-700">
+                <td class="px-3 py-3 text-slate-100">#{{ o.id }}</td>
+                <td class="px-3 py-3">{{ o.product?.name }}</td>
+                <td class="px-3 py-3">{{ o.quantity }}</td>
+                <td class="px-3 py-3">{{ o.totalPrice | currency }}</td>
+                <td class="px-3 py-3">{{ o.orderDate | date:'short' }}</td>
+                <td class="px-3 py-3">
+                  <div class="flex gap-2">
+                    <button (click)="viewOrder(o.id)" class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-sm">View</button>
+                    <button (click)="openQrForOrder(o)" class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-sm">QR</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div *ngIf="!loadingOrders && (!orders || orders.length === 0)" class="text-slate-400">You have no orders yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR modal -->
+  <div *ngIf="showQrModal" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+    <div class="bg-white rounded-lg p-6 w-[360px]">
+      <div class="flex flex-col items-center">
+        <img [src]="qrImage" alt="Order QR" class="w-72 h-72 object-contain bg-white p-3 rounded-md" />
+        <div class="mt-4 flex gap-2">
+          <button (click)="printQr()" class="px-4 py-2 bg-indigo-600 text-white rounded">Print</button>
+          <button (click)="closeQr()" class="px-4 py-2 bg-slate-200 text-slate-800 rounded">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -7,6 +7,8 @@
         <p>Manage your products and inventory.</p>
       </div>
 
+
+      <bi-nav [BIGrid]="grid" DomID="Products_Grid" PageTitle="Products"></bi-nav>
       <div class="action-row">
         <button type="button" class="secondary-btn" (click)="refresh()">Refresh</button>
         <button type="button" class="primary-btn" (click)="openQuickOrderModal()">Quick Order</button>

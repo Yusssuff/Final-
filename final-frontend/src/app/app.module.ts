@@ -10,6 +10,8 @@ import { RouterModule } from '@angular/router';
 
 import { TranslateModule } from '@ngx-translate/core';
 
+import { BIModulesModule } from 'bi-modules';
+
 import {
   CreateDialog,
   PublicApiClient,
@@ -51,6 +53,8 @@ import { authInterceptor } from './auth/auth.interceptor';
     RouterModule.forRoot(routes),
 
     TranslateModule.forRoot(),
+
+    BIModulesModule,
 
     PublicSdkModule,
 

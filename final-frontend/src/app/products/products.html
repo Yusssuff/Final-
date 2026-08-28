@@ -52,7 +52,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>{{ editingId ? 'Edit Product' : 'Add Product' }}</h2>
-        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">�</button>
+        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">✕</button>
       </div>
 
       <div class="modal-body">
@@ -87,7 +87,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>Place quick order</h2>
-        <button type="button" class="close-btn" (click)="closeQuickOrderModal()" aria-label="Close">�</button>
+        <button type="button" class="close-btn" (click)="closeQuickOrderModal()" aria-label="Close">✕</button>
       </div>
 
       <div class="modal-body">
@@ -116,12 +116,13 @@
     </div>
   </div>
 
-  <kendo-dialog *ngIf="showQrModal && latestOrderSummary" (close)="closeQrModal()" width="760">
-    <kendo-dialog-titlebar>
-      Order created
+  <kendo-dialog *ngIf="showQrModal && latestOrderSummary" (close)="closeQrModal()" width="760" class="qr-dialog-container">
+    <kendo-dialog-titlebar class="qr-dialog-header">
+      <span>Order created</span>
+      <button type="button" class="qr-close-btn" (click)="closeQrModal()" aria-label="Close">✕</button>
     </kendo-dialog-titlebar>
 
-    <div class="qr-dialog">
+    <div class="qr-dialog dark-qr-dialog">
       <div class="qr-left">
         <div class="qr-image-wrap">
           <img [src]="latestOrderSummary.qrUrl" alt="Order QR code" class="qr-image" />

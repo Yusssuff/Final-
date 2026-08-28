@@ -272,11 +272,57 @@
   padding: 0 24px 24px;
 }
 
+.qr-dialog-container {
+  --kendo-dialog-bg: #0b1220;
+  --kendo-dialog-text: #e2e8f0;
+}
+
+:host ::ng-deep .k-dialog,
+:host ::ng-deep .k-window,
+:host ::ng-deep .k-window-content,
+:host ::ng-deep .k-dialog-titlebar,
+:host ::ng-deep .k-dialog-content {
+  background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%) !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+}
+
+:host ::ng-deep .k-dialog-titlebar {
+  background: #0b1220 !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14) !important;
+  padding: 18px 20px !important;
+  font-weight: 600 !important;
+}
+
+:host ::ng-deep .k-window-content {
+  background: transparent !important;
+}
+
 .qr-dialog {
   display: flex;
   gap: 28px;
   padding: 20px 24px 6px;
   align-items: flex-start;
+  background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+  color: #e2e8f0;
+}
+
+.qr-dialog-header {
+  background: #0b1220 !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14) !important;
+}
+
+.qr-close-btn {
+  border: none;
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 .qr-left {
@@ -297,9 +343,10 @@
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: transparent;
-  padding: 8px;
-  box-shadow: 0 6px 18px rgba(2,6,23,0.25);
+  background: #ffffff;
+  padding: 14px;
+  box-shadow: 0 10px 24px rgba(2,6,23,0.4);
+  border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 .qr-image {
@@ -308,8 +355,9 @@
   object-fit: contain;
   border-radius: 8px;
   background: #ffffff;
-  padding: 12px;
-  border: 1px solid rgba(2,6,23,0.06);
+  padding: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
 }
 
 .qr-small-actions {

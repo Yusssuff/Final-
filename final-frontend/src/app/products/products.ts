@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+﻿import { Component, OnInit, ViewChild } from '@angular/core';
 
 import { CommonModule, DecimalPipe } from '@angular/common';
 
@@ -141,7 +141,7 @@ export class Products implements OnInit {
       edit: { visibility: true, disable: false },
       save: { visibility: true, disable: false },
       delete: { visibility: true, disable: false },
-      searchbar: { visibility: true }
+      searchbar: { visibility: true },
     };
   }
 
@@ -157,7 +157,8 @@ export class Products implements OnInit {
       case 'add':
         // If the BI-Nav includes a selected record or payload, prefill modal as needed.
         // Also support direct payload create if nav supplies a new record object.
-        const payload = event.payload || event.data || event.record || event.newRecord;
+        const payload =
+          event.payload || event.data || event.record || event.newRecord;
         if (payload && typeof payload === 'object') {
           // Attempt to create directly in backend when BI-Nav provides full record payload
           this.productsService.createProduct(payload).subscribe({
@@ -166,9 +167,12 @@ export class Products implements OnInit {
               alert('Product created (from BI-Nav)');
             },
             error: (err) => {
-              console.error('Failed to create product from BI-Nav payload', err);
+              console.error(
+                'Failed to create product from BI-Nav payload',
+                err,
+              );
               alert('Failed to create product');
-            }
+            },
           });
         } else if (event.recordId) {
           // open modal to edit existing (treat as edit)
@@ -200,7 +204,10 @@ export class Products implements OnInit {
         // close any modal if open or call grid Cancel if available
         if (this.showModal) {
           this.closeModal();
-        } else if (this.grid && typeof (this.grid as any).Cancel === 'function') {
+        } else if (
+          this.grid &&
+          typeof (this.grid as any).Cancel === 'function'
+        ) {
           (this.grid as any).Cancel();
         }
         break;
@@ -248,7 +255,11 @@ export class Products implements OnInit {
   // Debug helper: logs click events within the BI-Nav wrapper to help diagnose overlay/click issues.
   debugNavClick(evt: Event): void {
     const target = evt.target as HTMLElement;
-    console.debug('BI-Nav wrapper clicked, target:', target && (target.className || target.tagName), evt);
+    console.debug(
+      'BI-Nav wrapper clicked, target:',
+      target && (target.className || target.tagName),
+      evt,
+    );
   }
 
   // Handler for the projected Edit button inside BI-Nav.
@@ -256,7 +267,9 @@ export class Products implements OnInit {
     evt.stopPropagation();
     // Try to get the currently selected row from the BI-Grid if available
     try {
-      const current = (this.grid as any)?.GetRowValue ? (this.grid as any).GetRowValue() : null;
+      const current = (this.grid as any)?.GetRowValue
+        ? (this.grid as any).GetRowValue()
+        : null;
       const id = current && (current.id ?? current.ID ?? current.Id);
       if (id !== undefined && id !== null) {
         this.openEditModal(Number(id));
@@ -274,7 +287,9 @@ export class Products implements OnInit {
     return this.auth.isAdmin();
   }
 
-  get changeSetBinding(): any { return this.changeSet; }
+  get changeSetBinding(): any {
+    return this.changeSet;
+  }
 
   ngOnInit(): void {
     this.dataSource.read();
@@ -602,5 +617,3 @@ export class Products implements OnInit {
     }
   }
 }
-
-

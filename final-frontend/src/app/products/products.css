@@ -1,4 +1,4 @@
-:host {
+﻿:host {
   display: block;
 }
 
@@ -12,6 +12,42 @@
   color: #e2e8f0;
 }
 
+
+.bi-nav-wrapper {
+  width: 100%;
+  margin: 0 0 18px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.bi-nav-wrapper BI-Nav {
+  display: block;
+  width: min(100%, 1000px);
+  background: transparent !important;
+  border: 1px solid rgba(148, 163, 184, 0.16) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+.bi-nav-wrapper BI-Nav .bi-nav-header,
+.bi-nav-wrapper BI-Nav [class*="title"],
+.bi-nav-wrapper BI-Nav [class*="page-title"],
+.bi-nav-wrapper BI-Nav [class*="favorite"],
+.bi-nav-wrapper BI-Nav [class*="star"],
+.bi-nav-wrapper BI-Nav .nav-projection,
+.bi-nav-wrapper BI-Nav .k-button.nav-edit-btn {
+  display: none !important;
+}
+
+.bi-nav-wrapper BI-Nav .k-toolbar,
+.bi-nav-wrapper BI-Nav .k-toolbar.k-grid-toolbar,
+.bi-nav-wrapper BI-Nav .k-toolbar.k-toolbar,
+.bi-nav-wrapper BI-Nav .k-grid-toolbar {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
 .products-wrap {
   max-width: 1280px;
   margin: 0 auto;
@@ -19,9 +55,9 @@
 
 .top-panel {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   gap: 18px;
   padding: 24px 26px;
   border: 1px solid rgba(148, 163, 184, 0.12);
@@ -44,6 +80,7 @@
 }
 
 .header-copy h1 {
+  display: none;
   margin: 10px 0 0;
   font-size: clamp(2.2rem, 1vw + 1.6rem, 3rem);
   line-height: 1.1;
@@ -60,7 +97,7 @@
 .action-row {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 12px;
 }
 
@@ -423,7 +460,7 @@
   padding: 8px 12px;
   border-radius: 12px;
   /* Match the products container visual (dark navy surface) */
-  background: rgba(15, 23, 42, 0.72) !important;
+  background: #020817 !important;
   border: 1px solid rgba(148,163,184,0.06) !important;
   box-shadow: 0 8px 20px rgba(2,6,23,0.35) !important;
 }
@@ -472,20 +509,56 @@
 :host ::ng-deep .bi-nav-wrapper bi-nav,
 :host ::ng-deep .bi-nav-wrapper .bi-nav,
 :host ::ng-deep .bi-nav-wrapper .k-toolbar {
-  background-color: #020317 !important; /* near-black */
+  background-color: #020817 !important; /* near-black */
   color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
   position: relative !important;
   z-index: 10 !important;
 }
 :host ::ng-deep .bi-nav-wrapper bi-nav,
 :host ::ng-deep .bi-nav-wrapper BI-Nav {
-  background-color: #020317 !important;
+  background-color: #020817 !important;
   color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
   border-radius: 12px !important;
 }
 
 /* Ensure page content can scroll when BI-Nav present */
-.products-shell, .products-wrap {
+.products-shell,
+.bi-nav-wrapper {
+  width: 100%;
+  margin: 0 0 18px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.bi-nav-wrapper BI-Nav {
+  display: block;
+  width: min(100%, 1000px);
+  background: transparent !important;
+  border: 1px solid rgba(148, 163, 184, 0.16) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+.bi-nav-wrapper BI-Nav .bi-nav-header,
+.bi-nav-wrapper BI-Nav [class*="title"],
+.bi-nav-wrapper BI-Nav [class*="page-title"],
+.bi-nav-wrapper BI-Nav [class*="favorite"],
+.bi-nav-wrapper BI-Nav [class*="star"],
+.bi-nav-wrapper BI-Nav .nav-projection,
+.bi-nav-wrapper BI-Nav .k-button.nav-edit-btn {
+  display: none !important;
+}
+
+.bi-nav-wrapper BI-Nav .k-toolbar,
+.bi-nav-wrapper BI-Nav .k-toolbar.k-grid-toolbar,
+.bi-nav-wrapper BI-Nav .k-toolbar.k-toolbar,
+.bi-nav-wrapper BI-Nav .k-grid-toolbar {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.products-wrap {
   /* Allow normal document flow scrolling so the entire page can be reached */
   overflow: visible !important;
 }
@@ -603,34 +676,39 @@
 
 @media (max-width: 700px) {
   .top-panel {
-    padding: 20px 18px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 18px;
+  padding: 24px 26px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 26px;
+  background: rgba(15, 23, 42, 0.72);
+  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.28);
+}
 
-  .action-row {
-    width: 100%;
-    justify-content: stretch;
-  }
 
-  .action-row > * {
-    flex: 1 1 160px;
-  }
 
-  .search-block {
-    flex-direction: column;
-    align-items: stretch;
-  }
+.bi-nav-wrapper {
+  width: 100%;
+  background: transparent;
+}
 
-  .qr-content {
-    grid-template-columns: 1fr;
-  }
+.bi-nav-wrapper BI-Nav,
+.bi-nav-wrapper ::ng-deep BI-Nav,
+.bi-nav-wrapper BI-Nav .k-toolbar,
+.bi-nav-wrapper ::ng-deep BI-Nav .k-toolbar,
+.bi-nav-wrapper BI-Nav .k-grid-toolbar,
+.bi-nav-wrapper ::ng-deep BI-Nav .k-grid-toolbar {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
 
-  .modal-actions,
-  .qr-actions {
-    flex-direction: column-reverse;
-  }
 
-  .modal-actions > *,
-  .qr-actions > * {
-    width: 100%;
-  }
+
+
+
+
 }

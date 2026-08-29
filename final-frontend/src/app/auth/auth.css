@@ -164,7 +164,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  background: rgba(2, 6, 23, 0.8);
   border: 1px solid rgba(148, 163, 184, 0.08);
   border-radius: 999px;
   padding: 6px;

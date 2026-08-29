@@ -2,11 +2,12 @@
 using Final_Task.Services;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using SalesBuzz.Shared.Authorization;
 using SalesBuzz.Shared.Data;
 using SalesBuzz.Shared.Helpers;
 using SalesBuzz.Shared.Middleware;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,6 +72,31 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+var frontendRoot = Path.Combine(app.Environment.ContentRootPath, "final-frontend", "dist", "final-frontend", "browser");
+
+if (Directory.Exists(frontendRoot))
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(frontendRoot),
+        RequestPath = ""
+    });
+
+    app.MapFallback(async context =>
+    {
+        var indexPath = Path.Combine(frontendRoot, "index.html");
+        if (File.Exists(indexPath))
+        {
+            context.Response.ContentType = "text/html; charset=utf-8";
+            await context.Response.SendFileAsync(indexPath);
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status404NotFound;
+    });
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -92,4 +118,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-

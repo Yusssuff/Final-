@@ -27,6 +27,11 @@
                 "glob": "**/*",
                 "input": "node_modules/bi-modules/assets",
                 "output": "assets/bi-modules"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/bi-modules/assets/icons",
+                "output": "assets/icons"
               }
             ],
             "styles": [

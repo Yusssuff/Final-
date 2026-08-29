@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 
 import { CommonModule, DecimalPipe } from '@angular/common';
 
@@ -131,6 +131,112 @@ export class Products implements OnInit {
 
   searchValue = '';
 
+  get navButtons(): any {
+    const admin = this.isAdmin;
+    // Enable primary nav buttons to be interactive in the UI. Keep visibility controlled by admin,
+    // but ensure buttons are clickable for demonstration and for users who need them.
+    // If you want strict admin-only control, change disable back to !admin.
+    return {
+      add: { visibility: true, disable: false },
+      edit: { visibility: true, disable: false },
+      save: { visibility: true, disable: false },
+      delete: { visibility: true, disable: false },
+      searchbar: { visibility: true }
+    };
+  }
+
+  // Handle actions emitted by the BI-Nav toolbar. The nav emits objects like
+  // { action: 'add' | 'save' | 'delete' | 'cancel' | 'searchbar' | 'historyData' | 'workFlow', ... }
+  handleNavAction(event: any): void {
+    console.debug('BI-Nav ActionClicked event:', event);
+    if (!event || !event.action) {
+      return;
+    }
+
+    switch (event.action) {
+      case 'add':
+        // If the BI-Nav includes a selected record or payload, prefill modal as needed.
+        // Also support direct payload create if nav supplies a new record object.
+        const payload = event.payload || event.data || event.record || event.newRecord;
+        if (payload && typeof payload === 'object') {
+          // Attempt to create directly in backend when BI-Nav provides full record payload
+          this.productsService.createProduct(payload).subscribe({
+            next: () => {
+              this.grid?.read();
+              alert('Product created (from BI-Nav)');
+            },
+            error: (err) => {
+              console.error('Failed to create product from BI-Nav payload', err);
+              alert('Failed to create product');
+            }
+          });
+        } else if (event.recordId) {
+          // open modal to edit existing (treat as edit)
+          this.openEditModal(Number(event.recordId));
+        } else {
+          this.openAddModal();
+        }
+        break;
+      case 'save':
+        // Let the grid handle save if available, otherwise call submitModal for local modal flows
+        if (this.grid && typeof (this.grid as any).Save === 'function') {
+          (this.grid as any).Save();
+        } else {
+          // fallback: if modal is open, try to submit it; otherwise no-op
+          if (this.showModal) {
+            this.submitModal();
+          }
+        }
+        break;
+      case 'delete':
+        // If the nav provides a recordId in the event, delete that record directly.
+        if (event.recordId) {
+          this.openSelectDelete(Number(event.recordId));
+        } else {
+          this.openSelectDelete();
+        }
+        break;
+      case 'cancel':
+        // close any modal if open or call grid Cancel if available
+        if (this.showModal) {
+          this.closeModal();
+        } else if (this.grid && typeof (this.grid as any).Cancel === 'function') {
+          (this.grid as any).Cancel();
+        }
+        break;
+      case 'searchbar':
+        // The nav may include searchText property
+        const q = (event.searchText || '').toString().trim();
+        this.dataSource.read(q);
+        break;
+      case 'historyData':
+        // no-op here; BI-Nav sent historyData payload in event.historyData; implement if needed
+        console.debug('BI-Nav historyData action', event.historyData);
+        break;
+      case 'edit':
+        // Support an 'edit' action coming from the BI-Nav: open the edit modal for provided id or prompt
+        if (event.recordId) {
+          this.openSelectEdit(Number(event.recordId));
+        } else {
+          this.openSelectEdit();
+        }
+        break;
+      case 'attachments':
+        // The BI-Nav may pass a record id to open attachments for
+        this.openAttachments(event.recordId);
+        break;
+      case 'info':
+        this.openInfo(event.recordId);
+        break;
+      default:
+        console.debug('Unhandled BI-Nav action', event);
+        break;
+    }
+  }
+
+  // Toggle: show the BI-Nav for admins. Set to true to use BI-Nav, false to fall back to legacy admin buttons.
+  showBiNav = true;
+
   constructor(
     public readonly dataSource: ProductsDataSource,
     private readonly auth: AuthService,
@@ -138,6 +244,31 @@ export class Products implements OnInit {
     private readonly orderService: OrderService,
     private readonly qrService: QrService,
   ) {}
+
+  // Debug helper: logs click events within the BI-Nav wrapper to help diagnose overlay/click issues.
+  debugNavClick(evt: Event): void {
+    const target = evt.target as HTMLElement;
+    console.debug('BI-Nav wrapper clicked, target:', target && (target.className || target.tagName), evt);
+  }
+
+  // Handler for the projected Edit button inside BI-Nav.
+  onBiNavEditClick(evt: Event): void {
+    evt.stopPropagation();
+    // Try to get the currently selected row from the BI-Grid if available
+    try {
+      const current = (this.grid as any)?.GetRowValue ? (this.grid as any).GetRowValue() : null;
+      const id = current && (current.id ?? current.ID ?? current.Id);
+      if (id !== undefined && id !== null) {
+        this.openEditModal(Number(id));
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to determine selected row from grid', e);
+    }
+
+    // Fallback: prompt user for ID (legacy flow)
+    this.openSelectEdit();
+  }
 
   get isAdmin(): boolean {
     return this.auth.isAdmin();
@@ -209,13 +340,39 @@ export class Products implements OnInit {
     this.showModal = true;
   }
 
-  openSelectEdit(): void {
-    const idStr = window.prompt('Enter product ID to edit:');
-    const id = idStr ? parseInt(idStr, 10) : NaN;
-    if (!id || isNaN(id)) {
+  openSelectEdit(id?: number): void {
+    // If id provided by BI-Nav event, use it directly; otherwise fallback to prompt
+    if (typeof id === 'number' && !isNaN(id)) {
+      this.openEditModal(id);
       return;
     }
-    this.openEditModal(id);
+
+    const idStr = window.prompt('Enter product ID to edit:');
+    const parsed = idStr ? parseInt(idStr, 10) : NaN;
+    if (!parsed || isNaN(parsed)) {
+      return;
+    }
+    this.openEditModal(parsed);
+  }
+
+  openAttachments(id?: number | string | null): void {
+    // BI-Nav may signal attachments for a specific record. If id provided, open attachments flow.
+    console.debug('Open attachments for', id);
+    if (id) {
+      // TODO: integrate with attachments service/modal. For now open a dialog or alert.
+      alert('Open attachments for product id: ' + id);
+    } else {
+      alert('Open attachments - no record selected');
+    }
+  }
+
+  openInfo(id?: number | string | null): void {
+    console.debug('Open info for', id);
+    if (id) {
+      alert('Open info for product id: ' + id);
+    } else {
+      alert('Open info - no record selected');
+    }
   }
 
   openEditModal(id: number): void {
@@ -235,18 +392,36 @@ export class Products implements OnInit {
     });
   }
 
-  openSelectDelete(): void {
+  openSelectDelete(id?: number): void {
+    // If id provided by BI-Nav event, delete directly; otherwise ask user for id (legacy flow)
+    if (typeof id === 'number' && !isNaN(id)) {
+      if (!confirm(`Delete product id ${id}? This cannot be undone.`)) {
+        return;
+      }
+      this.productsService.deleteProduct(id).subscribe({
+        next: () => {
+          this.grid?.read();
+          alert('Product deleted');
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Failed to delete product');
+        },
+      });
+      return;
+    }
+
     const idStr = window.prompt('Enter product ID to delete:');
-    const id = idStr ? parseInt(idStr, 10) : NaN;
-    if (!id || isNaN(id)) {
+    const parsed = idStr ? parseInt(idStr, 10) : NaN;
+    if (!parsed || isNaN(parsed)) {
       return;
     }
 
-    if (!confirm(`Delete product id ${id}? This cannot be undone.`)) {
+    if (!confirm(`Delete product id ${parsed}? This cannot be undone.`)) {
       return;
     }
 
-    this.productsService.deleteProduct(id).subscribe({
+    this.productsService.deleteProduct(parsed).subscribe({
       next: () => {
         this.grid?.read();
         alert('Product deleted');

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin } from 'rxjs';
 
 import { ControlTypes, DataTypes, IDataSource } from 'bi-interfaces';
 
@@ -191,15 +191,58 @@ export class ProductsDataSource
     DeletedItemArray: any[],
   ): Observable<any> {
     /*
-     * CRUD is intentionally kept simple for now.
-     * We will connect BI Grid batch operations
-     * after the grid successfully renders.
+     * Implement batch by issuing the necessary API calls for
+     * created, updated, and deleted items. Use forkJoin to run
+     * them in parallel and return a combined result. This allows
+     * the BI-Grid/BI-Nav Save flow to persist changes to the backend.
      */
-    return new Observable((observer) => {
-      observer.next([]);
+    const calls: Observable<any>[] = [];
 
-      observer.complete();
-    });
+    // Created items -> POST
+    if (Array.isArray(CreatedItemArray) && CreatedItemArray.length > 0) {
+      for (const item of CreatedItemArray) {
+        calls.push(this.add(item));
+      }
+    }
+
+    // Updated items -> PUT (edit)
+    if (Array.isArray(UpdatedItemArray) && UpdatedItemArray.length > 0) {
+      for (const upd of UpdatedItemArray) {
+        // BI Grid/changeset may provide { id, data } or similar; try common shapes
+        const id = (upd && (upd.id ?? upd.key ?? upd.Key))?.toString();
+        const payload = upd && (upd.data ?? upd.payload ?? upd);
+        if (id) {
+          calls.push(this.edit(payload, id));
+        } else if (upd && typeof upd === 'object') {
+          // fallback: try to call put on item.id
+          const fallbackId = (upd as any).id;
+          if (fallbackId !== undefined) {
+            calls.push(this.edit(payload || upd, fallbackId.toString()));
+          }
+        }
+      }
+    }
+
+    // Deleted items -> DELETE
+    if (Array.isArray(DeletedItemArray) && DeletedItemArray.length > 0) {
+      for (const del of DeletedItemArray) {
+        const id = (del && (del.id ?? del.key ?? del.Key ?? del))?.toString();
+        if (id) {
+          calls.push(this.delete(id));
+        }
+      }
+    }
+
+    if (calls.length === 0) {
+      // Nothing to do
+      return new Observable((observer) => {
+        observer.next([]);
+        observer.complete();
+      });
+    }
+
+    // Run all calls in parallel and return their responses as an array
+    return forkJoin(calls);
   }
 
   formatAPIURLWithFilter(filter: string): string {

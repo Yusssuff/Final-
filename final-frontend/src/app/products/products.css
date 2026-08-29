@@ -64,6 +64,7 @@
   gap: 12px;
 }
 
+
 .action-btn,
 .primary-btn,
 .secondary-btn,
@@ -387,6 +388,210 @@
 
 /* remove older qr-actions usage */
 .qr-actions { display:none; }
+
+/* BI-Nav theming wrapper: override bi-modules / Kendo CSS variables locally so the nav matches the dark SalesBuzz theme */
+.bi-nav-wrapper {
+  /* Kendo / BI theme variables - tuned for dark navy */
+  --kendo-color-app-surface: #0b1220;
+  --kendo-color-on-app-surface: #e2e8f0;
+  --kendo-color-surface: #0f172a;
+  --kendo-color-surface-alt: #0b1220;
+  --kendo-color-border: rgba(148,163,184,0.08);
+  --kendo-color-primary: #2563eb;
+  --kendo-color-primary-hover: #3b82f6;
+  --kendo-color-on-primary: #ffffff;
+  --kendo-color-dark: #0b1220;
+  --kendo-color-on-dark: #e2e8f0;
+  --kendo-color-base-subtle: rgba(148,163,184,0.06);
+}
+
+/* Scope the variables to the BI-Nav element and all child Kendo elements */
+:host ::ng-deep .bi-nav-wrapper BI-Nav,
+:host ::ng-deep .bi-nav-wrapper .bi-nav,
+:host ::ng-deep .bi-nav-wrapper .k-button,
+:host ::ng-deep .bi-nav-wrapper .k-toolbar,
+:host ::ng-deep .bi-nav-wrapper .k-popup,
+:host ::ng-deep .bi-nav-wrapper .k-menu {
+  background: transparent !important;
+  color: var(--kendo-color-on-app-surface) !important;
+}
+
+/* Make the BI-Nav visual look like a native toolbar */
+:host ::ng-deep .bi-nav-wrapper BI-Nav {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  /* Match the products container visual (dark navy surface) */
+  background: rgba(15, 23, 42, 0.72) !important;
+  border: 1px solid rgba(148,163,184,0.06) !important;
+  box-shadow: 0 8px 20px rgba(2,6,23,0.35) !important;
+}
+
+/* Ensure icons and images are visible and sized appropriately */
+:host ::ng-deep .bi-nav-wrapper img {
+  width: 18px !important;
+  height: 18px !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
+
+/* Ensure toolbar background and inner containers are dark and do not block pointer events */
+:host ::ng-deep .bi-nav-wrapper .k-toolbar,
+:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-button-group,
+:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-button {
+  background: transparent !important;
+  color: var(--kendo-color-on-app-surface) !important;
+  pointer-events: auto !important;
+}
+
+/* Force internal toolbar panels to use dark surface */
+:host ::ng-deep .bi-nav-wrapper .k-tool-group,
+:host ::ng-deep .bi-nav-wrapper .k-tool-area,
+:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-button {
+  background: transparent !important;
+}
+
+/* Remove any large white background elements inside BI-Nav */
+:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-widget,
+:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-toolbar {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Strong overrides: force any white backgrounds inside the BI-Nav wrapper to be transparent so the dark wrapper shows through.
+   This fixes third-party styles that render a white toolbar container. Keep scoped to the wrapper only. */
+:host ::ng-deep .bi-nav-wrapper * {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure toolbar itself is dark and anchored in flow (not fixed) so page scroll works */
+:host ::ng-deep .bi-nav-wrapper BI-Nav,
+:host ::ng-deep .bi-nav-wrapper bi-nav,
+:host ::ng-deep .bi-nav-wrapper .bi-nav,
+:host ::ng-deep .bi-nav-wrapper .k-toolbar {
+  background-color: #020317 !important; /* near-black */
+  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+:host ::ng-deep .bi-nav-wrapper bi-nav,
+:host ::ng-deep .bi-nav-wrapper BI-Nav {
+  background-color: #020317 !important;
+  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
+  border-radius: 12px !important;
+}
+
+/* Ensure page content can scroll when BI-Nav present */
+.products-shell, .products-wrap {
+  /* Allow normal document flow scrolling so the entire page can be reached */
+  overflow: visible !important;
+}
+
+/* Ensure buttons are clickable and above internal non-interactive layers */
+:host ::ng-deep .bi-nav-wrapper button,
+:host ::ng-deep .bi-nav-wrapper .k-button {
+  pointer-events: auto !important;
+  z-index: 20 !important;
+}
+
+/* If there are overlay panels placed above toolbar, lower their z-index inside the wrapper */
+:host ::ng-deep .bi-nav-wrapper .overlay,
+:host ::ng-deep .bi-nav-wrapper .k-overlay {
+  z-index: 1 !important;
+}
+
+/* Buttons appearance */
+:host ::ng-deep .bi-nav-wrapper .k-button,
+:host ::ng-deep .bi-nav-wrapper button {
+  border-radius: 10px !important;
+  padding: 8px 10px !important;
+  background: transparent !important;
+  color: var(--kendo-color-on-app-surface) !important;
+  border: 1px solid rgba(148,163,184,0.04) !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper .k-button:hover,
+:host ::ng-deep .bi-nav-wrapper button:hover {
+  background: rgba(37,99,235,0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Style for the projected edit button so it matches the nav appearance */
+.nav-projection { display: inline-flex; align-items: center; }
+.nav-edit-btn {
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  background: transparent !important;
+  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
+  border: 1px solid rgba(148,163,184,0.04) !important;
+  margin-left: 6px;
+}
+.nav-edit-btn:hover { background: rgba(37,99,235,0.12) !important; color:#fff !important; }
+
+/* Fix spacing for toolbar groups */
+
+/* Emergency overrides: target BI-Nav internal classes to remove the white full-width bar and unblock clicks.
+   These are intentionally specific and scoped to .bi-nav-wrapper to avoid affecting other pages. */
+:host ::ng-deep .bi-nav-wrapper .nav-btns-container,
+:host ::ng-deep .bi-nav-wrapper .holder,
+:host ::ng-deep .bi-nav-wrapper .scroll-left,
+:host ::ng-deep .bi-nav-wrapper .scroll-right,
+:host ::ng-deep .bi-nav-wrapper .nav-btn,
+:host ::ng-deep .bi-nav-wrapper .nav-delete-btn,
+:host ::ng-deep .bi-nav-wrapper .nav-save-btn,
+:host ::ng-deep .bi-nav-wrapper .nav-cancel-btn,
+:host ::ng-deep .bi-nav-wrapper .mobile-hidden,
+:host ::ng-deep .bi-nav-wrapper .nav-info-btn {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
+  pointer-events: auto !important;
+  z-index: 90 !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper .holder {
+  padding: 6px 8px !important;
+}
+
+/* Force Kendo button surfaces transparent */
+:host ::ng-deep .bi-nav-wrapper .k-button,
+:host ::ng-deep .bi-nav-wrapper .k-button .k-button-icon,
+:host ::ng-deep .bi-nav-wrapper .k-button .k-button-iconimage,
+:host ::ng-deep .bi-nav-wrapper .k-button .k-button-text {
+  background: transparent !important;
+  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
+  border: none !important;
+}
+
+/* Remove any large block element that may be covering the toolbar */
+:host ::ng-deep .bi-nav-wrapper > div[role],
+:host ::ng-deep .bi-nav-wrapper > div > div {
+  background: transparent !important;
+}
+
+/* As a fallback, if something is still overlaying the toolbar, make it pointer-events:none so buttons become clickable */
+:host ::ng-deep .bi-nav-wrapper .overlay-blocker,
+:host ::ng-deep .bi-nav-wrapper .inset-overlay,
+:host ::ng-deep .bi-nav-wrapper .toolbar-overlay {
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper .k-toolbar {
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+/* Prevent broken-image icon from being too large; if any icon still broken it'll be small and not push layout */
+:host ::ng-deep .bi-nav-wrapper img[alt] {
+  min-width: 18px;
+  min-height: 18px;
+}
+
 
 @media (max-width: 700px) {
   .qr-dialog { flex-direction: column; align-items:center; }

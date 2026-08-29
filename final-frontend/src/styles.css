@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+/* Page-level scrolling fix: ensure the app root and document allow normal vertical scrolling.
+   Some component styles were constraining the viewport and preventing reaching page bottom.
+   These rules are intentionally global and use !important only where necessary. */
+html, body, app-root {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-y: auto !important;
+}
+
+/* Make router-outlet containers follow document flow */
+app-root > * {
+  min-height: 100% !important;
+  height: auto !important;
+}
+

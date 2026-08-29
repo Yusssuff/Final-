@@ -7,14 +7,36 @@
         <p>Manage your products and inventory.</p>
       </div>
 
-
-      <bi-nav [BIGrid]="grid" DomID="Products_Grid" PageTitle="Products"></bi-nav>
+
+
+<div class="w-full flex items-center justify-between mb-4 bi-nav-wrapper" (click)="debugNavClick($event)">
+  <!-- Show BI-Nav only to admins and only after the grid instance is available. -->
+  <BI-Nav *ngIf="isAdmin && grid && showBiNav"
+          [BIGrid]="grid"
+          [navButtons]="navButtons"
+          [CanInsert]="isAdmin"
+          [CanUpdate]="isAdmin"
+          [CanDelete]="isAdmin"
+          [CanSave]="isAdmin"
+          [CanViewAttachments]="isAdmin"
+          [CanAddAttachments]="isAdmin"
+          DomID="Products_Grid"
+          PageTitle="Products"
+          (ActionClicked)="handleNavAction($event)">
+    <!-- Project a custom Edit button into the BI-Nav toolbar. BI-Nav accepts projected content. -->
+    <div biNavDesc class="nav-projection">
+      <button type="button" class="k-button nav-edit-btn" (click)="onBiNavEditClick($event)">Edit</button>
+    </div>
+  </BI-Nav>
+</div>
+
       <div class="action-row">
         <button type="button" class="secondary-btn" (click)="refresh()">Refresh</button>
         <button type="button" class="primary-btn" (click)="openQuickOrderModal()">Quick Order</button>
-        <button *ngIf="isAdmin" type="button" class="warning-btn" (click)="openAddModal()">Add Product</button>
-        <button *ngIf="isAdmin" type="button" class="warning-btn" (click)="openSelectEdit()">Edit Product</button>
-        <button *ngIf="isAdmin" type="button" class="danger-btn" (click)="openSelectDelete()">Delete Product</button>
+        <!-- Legacy admin buttons are hidden when BI-Nav is enabled (showBiNav=true). -->
+        <button *ngIf="isAdmin && !showBiNav" type="button" class="warning-btn" (click)="openAddModal()">Add Product</button>
+        <button *ngIf="isAdmin && !showBiNav" type="button" class="warning-btn" (click)="openSelectEdit()">Edit Product</button>
+        <button *ngIf="isAdmin && !showBiNav" type="button" class="danger-btn" (click)="openSelectDelete()">Delete Product</button>
       </div>
     </header>
 

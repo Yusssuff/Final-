@@ -1,6 +1,6 @@
 ﻿import { Component, OnInit, ViewChild } from '@angular/core';
 
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 import { FormsModule } from '@angular/forms';
 
@@ -29,7 +29,6 @@ import { QrService } from '../shared/qr.service';
 
   styleUrls: ['./products.css'],
 
-  providers: [DecimalPipe],
 })
 export class Products implements OnInit {
   @ViewChild('productsGrid')
@@ -251,37 +250,6 @@ export class Products implements OnInit {
     private readonly orderService: OrderService,
     private readonly qrService: QrService,
   ) {}
-
-  // Debug helper: logs click events within the BI-Nav wrapper to help diagnose overlay/click issues.
-  debugNavClick(evt: Event): void {
-    const target = evt.target as HTMLElement;
-    console.debug(
-      'BI-Nav wrapper clicked, target:',
-      target && (target.className || target.tagName),
-      evt,
-    );
-  }
-
-  // Handler for the projected Edit button inside BI-Nav.
-  onBiNavEditClick(evt: Event): void {
-    evt.stopPropagation();
-    // Try to get the currently selected row from the BI-Grid if available
-    try {
-      const current = (this.grid as any)?.GetRowValue
-        ? (this.grid as any).GetRowValue()
-        : null;
-      const id = current && (current.id ?? current.ID ?? current.Id);
-      if (id !== undefined && id !== null) {
-        this.openEditModal(Number(id));
-        return;
-      }
-    } catch (e) {
-      console.warn('Failed to determine selected row from grid', e);
-    }
-
-    // Fallback: prompt user for ID (legacy flow)
-    this.openSelectEdit();
-  }
 
   get isAdmin(): boolean {
     return this.auth.isAdmin();

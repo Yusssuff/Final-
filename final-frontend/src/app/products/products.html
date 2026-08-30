@@ -9,7 +9,7 @@
 
 
 
-<div class="w-full flex items-center justify-between mb-4 bi-nav-wrapper" (click)="debugNavClick($event)">
+<div class="w-full flex items-center justify-between mb-4 bi-nav-wrapper">
   <BI-Nav *ngIf="isAdmin && grid && showBiNav"
           [BIGrid]="grid"
           [navButtons]="navButtons"
@@ -27,10 +27,6 @@
       <div class="action-row">
         <button type="button" class="secondary-btn" (click)="refresh()">Refresh</button>
         <button type="button" class="primary-btn" (click)="openQuickOrderModal()">Quick Order</button>
-        <!-- Legacy admin buttons are hidden when BI-Nav is enabled (showBiNav=true). -->
-        <button *ngIf="isAdmin && !showBiNav" type="button" class="warning-btn" (click)="openAddModal()">Add Product</button>
-        <button *ngIf="isAdmin && !showBiNav" type="button" class="warning-btn" (click)="openSelectEdit()">Edit Product</button>
-        <button *ngIf="isAdmin && !showBiNav" type="button" class="danger-btn" (click)="openSelectDelete()">Delete Product</button>
       </div>
     </header>
 
@@ -70,7 +66,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>{{ editingId ? 'Edit Product' : 'Add Product' }}</h2>
-        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">âœ•</button>
+        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">×</button>
       </div>
 
       <div class="modal-body">
@@ -105,7 +101,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>Place quick order</h2>
-        <button type="button" class="close-btn" (click)="closeQuickOrderModal()" aria-label="Close">âœ•</button>
+        <button type="button" class="close-btn" (click)="closeQuickOrderModal()" aria-label="Close">×</button>
       </div>
 
       <div class="modal-body">
@@ -137,7 +133,7 @@
   <kendo-dialog *ngIf="showQrModal && latestOrderSummary" (close)="closeQrModal()" width="760" class="qr-dialog-container">
     <kendo-dialog-titlebar class="qr-dialog-header">
       <span>Order created</span>
-      <button type="button" class="qr-close-btn" (click)="closeQrModal()" aria-label="Close">âœ•</button>
+      <button type="button" class="qr-close-btn" (click)="closeQrModal()" aria-label="Close">×</button>
     </kendo-dialog-titlebar>
 
     <div class="qr-dialog dark-qr-dialog">

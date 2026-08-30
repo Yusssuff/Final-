@@ -7,6 +7,17 @@ html, body, app-root {
   height: auto !important;
   min-height: 100% !important;
   overflow-y: auto !important;
+  background: #020817 !important;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh !important;
 }
 
 /* Make router-outlet containers follow document flow */
@@ -14,4 +25,3 @@ app-root > * {
   min-height: 100% !important;
   height: auto !important;
 }
-

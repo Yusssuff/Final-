@@ -13,6 +13,15 @@ export interface GridResult<T> {
   total: number;
 }
 
+type ProductGridColumn = IDataSource['Columns'][number] & {
+  DisplayName: string;
+  IsEditable: boolean;
+  IsFilterable: boolean;
+  IsVisible: boolean;
+  DefaultValue: string | number | null;
+  Width: number;
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -32,27 +41,51 @@ export class ProductsDataSource
   Key5 = '';
   Key6 = '';
 
-  Columns: IDataSource['Columns'] = [
+  Columns: ProductGridColumn[] = [
     {
       Name: 'id',
-      DataType: DataTypes.NUMERIC,
-      controlType: ControlTypes.Number,
+      DisplayName: 'ID',
+      DataType: DataTypes.Text,
+      controlType: ControlTypes.Text,
+      IsEditable: false,
+      IsFilterable: true,
+      IsVisible: true,
+      DefaultValue: '',
+      Width: 90,
     },
     {
       Name: 'name',
+      DisplayName: 'Product',
       DataType: DataTypes.Text,
       Length: 150,
       controlType: ControlTypes.Text,
+      IsEditable: false,
+      IsFilterable: true,
+      IsVisible: true,
+      DefaultValue: '',
+      Width: 240,
     },
     {
       Name: 'price',
-      DataType: DataTypes.NUMERIC,
-      controlType: ControlTypes.Number,
+      DisplayName: 'Price',
+      DataType: DataTypes.Text,
+      controlType: ControlTypes.Text,
+      IsEditable: false,
+      IsFilterable: true,
+      IsVisible: true,
+      DefaultValue: '',
+      Width: 130,
     },
     {
       Name: 'quantity',
-      DataType: DataTypes.NUMERIC,
-      controlType: ControlTypes.Number,
+      DisplayName: 'Quantity',
+      DataType: DataTypes.Text,
+      controlType: ControlTypes.Text,
+      IsEditable: false,
+      IsFilterable: true,
+      IsVisible: true,
+      DefaultValue: '',
+      Width: 130,
     },
   ];
 

@@ -1,17 +1,17 @@
-<div class="auth-shell">
-  <div class="auth-panel">
-    <div class="auth-glow"></div>
+<div class="min-h-screen grid place-items-center overflow-y-auto bg-[radial-gradient(circle_at_top,rgba(56,189,248,.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,.14),transparent_22%),#020817] p-6">
+  <div class="relative w-full max-w-[460px] max-h-[calc(100vh-48px)] overflow-y-auto rounded-[30px] !border !border-slate-400/20 bg-slate-900/90 shadow-[0_28px_80px_rgba(2,6,23,.8)] backdrop-blur-xl">
+    <div class="pointer-events-none absolute left-1/2 top-[-30px] h-[180px] w-[340px] -translate-x-1/2 rounded-full bg-blue-500/15 blur-[42px]"></div>
 
-    <button type="button" class="auth-close" aria-label="Close">
+    <button type="button" class="absolute right-[18px] top-[18px] z-10 grid h-10 w-10 place-items-center rounded-full border-0 !bg-slate-900/50 !text-slate-400 transition hover:!bg-slate-400/10 hover:!text-white" aria-label="Close">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path stroke-linecap="round" d="M6 6l12 12" />
         <path stroke-linecap="round" d="M18 6L6 18" />
       </svg>
     </button>
 
-    <div class="auth-content">
-      <div class="brand-wrap">
-        <div class="brand-icon">
+    <div class="relative p-7 pb-8">
+      <div class="flex items-center gap-3.5">
+        <div class="grid h-12 w-12 place-items-center rounded-2xl !border !border-blue-400/25 bg-blue-600/20 text-blue-200">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path stroke-linecap="round" d="M5 18V9" />
             <path stroke-linecap="round" d="M10 18V5" />
@@ -21,91 +21,91 @@
         </div>
 
         <div>
-          <p class="brand-name">SalesBuzz</p>
-          <p class="brand-subtitle">Business Management</p>
+          <p class="m-0 text-[.95rem] font-bold tracking-tight text-slate-50">SalesBuzz</p>
+          <p class="m-0 mt-1 text-[.68rem] uppercase tracking-[.08em] text-slate-400/80">Business Management</p>
         </div>
       </div>
 
-      <div class="auth-header">
-        <p class="eyebrow">{{ isLogin ? 'Sign in' : 'Get started' }}</p>
-        <h2>{{ isLogin ? 'Welcome back' : 'Create your account' }}</h2>
-        <p>
+      <div class="mt-8">
+        <p class="m-0 text-[.7rem] font-bold uppercase tracking-[.18em] text-sky-300">{{ isLogin ? 'Sign in' : 'Get started' }}</p>
+        <h2 class="m-0 mt-3 !text-[clamp(2rem,2vw+1rem,2.7rem)] leading-tight tracking-[-.06em] !text-slate-50">{{ isLogin ? 'Welcome back' : 'Create your account' }}</h2>
+        <p class="m-0 mt-3 max-w-[360px] text-[.95rem] leading-relaxed text-slate-400/80">
           {{ isLogin ? 'Sign in to continue to your SalesBuzz workspace.' :
           'Create your account to start using SalesBuzz.' }}
         </p>
       </div>
 
-      <div class="switcher" role="tablist" aria-label="Authentication mode">
-        <button type="button" (click)="switchToLogin()" [class.active]="isLogin">Sign in</button>
-        <button type="button" (click)="switchToRegister()" [class.active]="!isLogin">Register</button>
+      <div class="mt-7 grid grid-cols-2 gap-2 rounded-full !border !border-slate-400/10 p-1.5" role="tablist" aria-label="Authentication mode">
+        <button type="button" (click)="switchToLogin()" [class]="isLogin ? 'rounded-full !bg-blue-600/20 px-3.5 py-3 !text-[.88rem] font-semibold !text-slate-50 shadow-[inset_0_0_0_1px_rgba(96,165,250,.18)]' : 'rounded-full !bg-transparent px-3.5 py-3 !text-[.88rem] font-semibold !text-slate-400 hover:!text-slate-100'">Sign in</button>
+        <button type="button" (click)="switchToRegister()" [class]="!isLogin ? 'rounded-full !bg-blue-600/20 px-3.5 py-3 !text-[.88rem] font-semibold !text-slate-50 shadow-[inset_0_0_0_1px_rgba(96,165,250,.18)]' : 'rounded-full !bg-transparent px-3.5 py-3 !text-[.88rem] font-semibold !text-slate-400 hover:!text-slate-100'">Register</button>
       </div>
 
       @if (errorMessage) {
-      <div class="alert error">
-        <div class="alert-icon">
+      <div class="mt-[22px] flex items-start gap-3 rounded-[18px] border border-red-400/25 bg-red-500/10 px-3.5 py-3 text-red-200">
+        <div class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/5">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="9" />
             <path stroke-linecap="round" d="M12 8v4" />
             <path stroke-linecap="round" d="M12 16h.01" />
           </svg>
         </div>
-        <p>{{ errorMessage }}</p>
+        <p class="m-0 text-xs leading-relaxed">{{ errorMessage }}</p>
       </div>
       }
 
       @if (successMessage) {
-      <div class="alert success">
-        <div class="alert-icon">
+      <div class="mt-[22px] flex items-start gap-3 rounded-[18px] border border-emerald-400/25 bg-emerald-500/10 px-3.5 py-3 text-green-200">
+        <div class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/5">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" d="M5 12l4 4L19 6" />
           </svg>
         </div>
-        <p>{{ successMessage }}</p>
+        <p class="m-0 text-xs leading-relaxed">{{ successMessage }}</p>
       </div>
       }
 
       @if (isLogin) {
-      <form [formGroup]="loginForm" (ngSubmit)="login()" class="auth-form">
-        <div class="field-group">
-          <label for="loginUsername">Username</label>
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="mt-6">
+        <div class="mb-[18px]">
+          <label for="loginUsername" class="mb-2 block text-[.76rem] font-semibold text-slate-200/90">Username</label>
           <input
             id="loginUsername"
             type="text"
             formControlName="username"
             autocomplete="username"
-            placeholder="Enter your username"
+            placeholder="Enter your username" class="h-[52px] w-full rounded-2xl !border !border-slate-400/15 bg-slate-900/70 px-4 !text-[.95rem] !text-slate-50 outline-none placeholder:!text-slate-400/70 focus:!border-blue-400 focus:ring-4 focus:ring-blue-500/15"
           />
 
           @if (loginForm.get('username')?.touched && loginForm.get('username')?.invalid) {
-          <p class="field-error">Username is required.</p>
+          <p class="m-0 mt-2 text-xs text-red-300">Username is required.</p>
           }
         </div>
 
-        <div class="field-group">
-          <label for="loginPassword">Password</label>
+        <div class="mb-[18px]">
+          <label for="loginPassword" class="mb-2 block text-[.76rem] font-semibold text-slate-200/90">Password</label>
           <input
             id="loginPassword"
             type="password"
             formControlName="password"
             autocomplete="current-password"
-            placeholder="Enter your password"
+            placeholder="Enter your password" class="h-[52px] w-full rounded-2xl !border !border-slate-400/15 bg-slate-900/70 px-4 !text-[.95rem] !text-slate-50 outline-none placeholder:!text-slate-400/70 focus:!border-blue-400 focus:ring-4 focus:ring-blue-500/15"
           />
 
           @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
-          <p class="field-error">Password is required.</p>
+          <p class="m-0 mt-2 text-xs text-red-300">Password is required.</p>
           }
         </div>
 
-        <button type="submit" [disabled]="isLoading" class="primary-btn">
+        <button type="submit" [disabled]="isLoading" class="mt-1 inline-flex w-full items-center justify-center gap-2.5 rounded-[18px] border-0 !bg-gradient-to-br from-blue-600 to-blue-500 px-[18px] py-[15px] !text-[1rem] font-bold !text-white shadow-[0_18px_30px_rgba(37,99,235,.24)] transition hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-70">
           @if (isLoading) {
-          <svg class="spinner" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" class="spinner-track" />
+          <svg class="h-[18px] w-[18px] animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" class="opacity-35" />
             <path fill="currentColor" d="M21 12a9 9 0 00-9-9v3a6 6 0 016 6h3z" />
           </svg>
           <span>Signing in...</span>
           } @else {
           <span>Sign in</span>
-          <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path stroke-linecap="round" d="M5 12h14" />
             <path stroke-linecap="round" d="M13 6l6 6-6 6" />
           </svg>
@@ -115,59 +115,59 @@
       }
 
       @if (!isLogin) {
-      <form [formGroup]="registerForm" (ngSubmit)="register()" class="auth-form">
-        <div class="field-group">
-          <label for="registerUsername">Username</label>
+      <form [formGroup]="registerForm" (ngSubmit)="register()" class="mt-6">
+        <div class="mb-[18px]">
+          <label for="registerUsername" class="mb-2 block text-[.76rem] font-semibold text-slate-200/90">Username</label>
           <input
             id="registerUsername"
             type="text"
             formControlName="username"
             autocomplete="username"
-            placeholder="Choose your username"
+            placeholder="Choose your username" class="h-[52px] w-full rounded-2xl !border !border-slate-400/15 bg-slate-900/70 px-4 !text-[.95rem] !text-slate-50 outline-none placeholder:!text-slate-400/70 focus:!border-blue-400 focus:ring-4 focus:ring-blue-500/15"
           />
 
           @if (registerForm.get('username')?.touched && registerForm.get('username')?.invalid) {
-          <p class="field-error">Username must contain at least 3 characters.</p>
+          <p class="m-0 mt-2 text-xs text-red-300">Username must contain at least 3 characters.</p>
           }
         </div>
 
-        <div class="field-group">
-          <label for="registerPassword">Password</label>
+        <div class="mb-[18px]">
+          <label for="registerPassword" class="mb-2 block text-[.76rem] font-semibold text-slate-200/90">Password</label>
           <input
             id="registerPassword"
             type="password"
             formControlName="password"
             autocomplete="new-password"
-            placeholder="Create your password"
+            placeholder="Create your password" class="h-[52px] w-full rounded-2xl !border !border-slate-400/15 bg-slate-900/70 px-4 !text-[.95rem] !text-slate-50 outline-none placeholder:!text-slate-400/70 focus:!border-blue-400 focus:ring-4 focus:ring-blue-500/15"
           />
-          <p class="helper-text">Minimum 6 characters.</p>
+          <p class="m-0 mt-2 text-xs text-slate-400/75">Minimum 6 characters.</p>
         </div>
 
-        <div class="field-group">
-          <label for="registerConfirmPassword">Confirm password</label>
+        <div class="mb-[18px]">
+          <label for="registerConfirmPassword" class="mb-2 block text-[.76rem] font-semibold text-slate-200/90">Confirm password</label>
           <input
             id="registerConfirmPassword"
             type="password"
             formControlName="confirmPassword"
             autocomplete="new-password"
-            placeholder="Repeat your password"
+            placeholder="Repeat your password" class="h-[52px] w-full rounded-2xl !border !border-slate-400/15 bg-slate-900/70 px-4 !text-[.95rem] !text-slate-50 outline-none placeholder:!text-slate-400/70 focus:!border-blue-400 focus:ring-4 focus:ring-blue-500/15"
           />
 
           @if (registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.value && registerForm.get('password')?.value !== registerForm.get('confirmPassword')?.value) {
-          <p class="field-error">Passwords do not match.</p>
+          <p class="m-0 mt-2 text-xs text-red-300">Passwords do not match.</p>
           }
         </div>
 
-        <button type="submit" [disabled]="isLoading" class="primary-btn">
+        <button type="submit" [disabled]="isLoading" class="mt-1 inline-flex w-full items-center justify-center gap-2.5 rounded-[18px] border-0 !bg-gradient-to-br from-blue-600 to-blue-500 px-[18px] py-[15px] !text-[1rem] font-bold !text-white shadow-[0_18px_30px_rgba(37,99,235,.24)] transition hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-70">
           @if (isLoading) {
-          <svg class="spinner" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" class="spinner-track" />
+          <svg class="h-[18px] w-[18px] animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" class="opacity-35" />
             <path fill="currentColor" d="M21 12a9 9 0 00-9-9v3a6 6 0 016 6h3z" />
           </svg>
           <span>Creating account...</span>
           } @else {
           <span>Create account</span>
-          <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path stroke-linecap="round" d="M5 12h14" />
             <path stroke-linecap="round" d="M13 6l6 6-6 6" />
           </svg>

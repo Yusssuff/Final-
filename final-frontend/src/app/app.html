@@ -1,14 +1,38 @@
-<header *ngIf="!isAuthPage" class="flex items-center justify-between p-4 bg-[#0b1220] text-white">
-  <div class="flex items-center gap-3">
-    <a routerLink="/products" class="text-lg font-semibold">SalesBuzz</a>
+<header *ngIf="!isAuthPage" class="flex min-h-[76px] items-center justify-between border-b border-slate-400/15 bg-[#0b1220]/95 !px-8 !py-4 !pr-20 text-white shadow-[0_10px_28px_rgba(2,6,23,.22)] backdrop-blur-md max-sm:!px-4 max-sm:!py-4 max-sm:!pr-25">
+  <div class="flex items-center">
+    <a routerLink="/products" class="group flex items-center gap-3.5 !text-slate-50 !no-underline">
+      <span class="grid h-11 w-11 place-items-center rounded-[14px] border border-blue-300/30 bg-gradient-to-br from-blue-500/30 to-indigo-500/20 text-blue-200 shadow-[0_8px_22px_rgba(37,99,235,.18)] transition group-hover:border-sky-300/60 group-hover:shadow-[0_10px_26px_rgba(37,99,235,.28)]">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path stroke-linecap="round" d="M5 18V9" />
+          <path stroke-linecap="round" d="M10 18V5" />
+          <path stroke-linecap="round" d="M15 18v-7" />
+          <path stroke-linecap="round" d="M20 18V3" />
+        </svg>
+      </span>
+      <span class="flex flex-col">
+        <span class="text-[1.08rem] font-bold leading-tight tracking-[-.02em] !text-slate-50 transition-colors group-hover:!text-sky-300">SalesBuzz</span>
+        <span class="mt-0.5 text-[.62rem] font-semibold uppercase tracking-[.16em] !text-slate-400/80">Business workspace</span>
+      </span>
+    </a>
   </div>
 
-  <div class="flex items-center gap-3">
-    <a *ngIf="!isLoggedIn" routerLink="/auth" class="text-sm">Sign in</a>
+  <div class="flex items-center gap-3 max-sm:gap-2">
+    <a *ngIf="!isLoggedIn" routerLink="/auth" class="rounded-xl px-3 py-2 text-sm !text-slate-200 !no-underline transition hover:bg-white/5 hover:!text-sky-300">Sign in</a>
 
-    <div *ngIf="isLoggedIn" class="flex items-center gap-3">
-      <a routerLink="/profile" class="text-sm hover:underline">{{ username }}</a>
-      <button (click)="logout()" class="rounded px-3 py-1 bg-indigo-600 text-white text-sm">Logout</button>
+    <div *ngIf="isLoggedIn" class="flex items-center gap-2.5">
+      <a routerLink="/profile" class="group flex items-center gap-2.5 rounded-[13px] border border-slate-400/20 bg-white/[.03] px-3.5 py-2 !text-slate-200 !no-underline transition hover:border-sky-300/45 hover:bg-sky-400/10">
+        <span class="grid h-8 w-8 place-items-center rounded-full bg-sky-400/15 text-sky-300">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.5" />
+            <path stroke-linecap="round" d="M5.5 19c.8-3.2 3-5 6.5-5s5.7 1.8 6.5 5" />
+          </svg>
+        </span>
+        <span class="flex flex-col">
+          <span class="text-[.62rem] font-semibold uppercase tracking-[.12em] !text-slate-400/75">Signed in as</span>
+          <span class="text-sm font-semibold !text-slate-100 group-hover:!text-sky-300">{{ username }}</span>
+        </span>
+      </a>
+      <button (click)="logout()" class="min-h-10 rounded-[11px] border border-red-300/35 bg-[#dc3f20] px-4 text-sm font-bold text-white shadow-[0_8px_18px_rgba(220,63,32,.18)] transition hover:-translate-y-px hover:bg-[#ef4d2d] focus:bg-[#ef4d2d] max-sm:px-3">Logout</button>
     </div>
   </div>
 </header>

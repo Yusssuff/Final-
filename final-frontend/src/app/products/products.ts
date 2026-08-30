@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 
 import { CommonModule, DecimalPipe } from '@angular/common';
 
@@ -31,8 +31,8 @@ import { QrService } from '../shared/qr.service';
   styleUrls: ['./products.css'],
 
 })
-export class Products implements OnInit {
-  @ViewChild('productsGrid')
+export class Products implements OnInit, AfterViewInit {
+  @ViewChild('productsGrid', { static: true })
   grid?: BIGridComponent;
 
   readonly changeSet: IChangeset = {
@@ -244,12 +244,15 @@ export class Products implements OnInit {
   // Toggle: show the BI-Nav for admins. Set to true to use BI-Nav, false to fall back to legacy admin buttons.
   showBiNav = true;
 
+  navReady = false;
+
   constructor(
     public readonly dataSource: ProductsDataSource,
     private readonly auth: AuthService,
     private readonly productsService: ProductsService,
     private readonly orderService: OrderService,
     private readonly qrService: QrService,
+    private readonly changeDetectorRef: ChangeDetectorRef,
   ) {}
 
   get isAdmin(): boolean {
@@ -262,6 +265,11 @@ export class Products implements OnInit {
 
   ngOnInit(): void {
     this.dataSource.read();
+  }
+
+  ngAfterViewInit(): void {
+    this.navReady = true;
+    this.changeDetectorRef.detectChanges();
   }
 
   searchProducts(event: Event): void {

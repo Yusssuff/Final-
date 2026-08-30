@@ -1,320 +1,7 @@
-:host {
-  display: block;
-}
-
-.products-shell {
-  min-height: 100vh;
-  padding: 32px 18px 52px;
-  background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.1), transparent 26%),
-    #020817;
-  color: #e2e8f0;
-}
-
-
-.bi-nav-wrapper {
-  width: 100%;
-  margin: 0 0 18px;
-  display: flex;
-  justify-content: flex-start;
-}
-
-.bi-nav-wrapper BI-Nav {
-  display: block;
-  width: min(100%, 1000px);
-  background: transparent !important;
-  border: 1px solid rgba(148, 163, 184, 0.16) !important;
-  border-radius: 16px !important;
-  box-shadow: none !important;
-}
-
-.bi-nav-wrapper BI-Nav .bi-nav-header,
-.bi-nav-wrapper BI-Nav [class*="title"],
-.bi-nav-wrapper BI-Nav [class*="page-title"],
-.bi-nav-wrapper BI-Nav [class*="favorite"],
-.bi-nav-wrapper BI-Nav [class*="star"],
-.bi-nav-wrapper BI-Nav .nav-projection,
-.bi-nav-wrapper BI-Nav .k-button.nav-edit-btn {
-  display: none !important;
-}
-
-.bi-nav-wrapper BI-Nav .k-toolbar,
-.bi-nav-wrapper BI-Nav .k-toolbar.k-grid-toolbar,
-.bi-nav-wrapper BI-Nav .k-toolbar.k-toolbar,
-.bi-nav-wrapper BI-Nav .k-grid-toolbar {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-.products-wrap {
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.top-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 18px;
-  padding: 24px 26px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 26px;
-  background: rgba(15, 23, 42, 0.72);
-  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.28);
-}
-
-.header-copy {
-  min-width: 220px;
-}
-
-.eyebrow {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: #7dd3fc;
-}
-
-.header-copy h1 {
-  display: none;
-  margin: 10px 0 0;
-  font-size: clamp(2.2rem, 1vw + 1.6rem, 3rem);
-  line-height: 1.1;
-  letter-spacing: -0.06em;
-  color: #f8fafc;
-}
-
-.header-copy p {
-  margin: 10px 0 0;
-  color: rgba(148, 163, 184, 0.82);
-  font-size: 0.96rem;
-}
-
-.action-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: 12px;
-}
-
-
-.action-btn,
-.primary-btn,
-.secondary-btn,
-.warning-btn,
-.danger-btn,
-.ghost-btn {
-  border: 0;
-  border-radius: 14px;
-  padding: 11px 16px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-  cursor: pointer;
-}
-
-.action-btn:hover,
-.primary-btn:hover,
-.secondary-btn:hover,
-.warning-btn:hover,
-.danger-btn:hover,
-.ghost-btn:hover {
-  transform: translateY(-1px);
-}
-
-.primary-btn {
-  color: #fff;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  box-shadow: 0 12px 20px rgba(37, 99, 235, 0.22);
-}
-
-.secondary-btn {
-  color: #e2e8f0;
-  background: rgba(37, 99, 235, 0.12);
-  border: 1px solid rgba(96, 165, 250, 0.18);
-}
-
-.warning-btn {
-  color: #fef3c7;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.22);
-}
-
-.danger-btn {
-  color: #fecaca;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.ghost-btn {
-  color: #e2e8f0;
-  background: rgba(148, 163, 184, 0.08);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-}
-
-.search-block {
-  margin-top: 22px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.search-wrap {
-  position: relative;
-  flex: 1;
-}
-
-.search-wrap svg {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  width: 18px;
-  height: 18px;
-  transform: translateY(-50%);
-  color: rgba(148, 163, 184, 0.8);
-}
-
-.search-wrap input {
-  width: 100%;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(15, 23, 42, 0.7);
-  color: #f8fafc;
-  border-radius: 16px;
-  height: 52px;
-  padding: 0 16px 0 44px;
-  font-size: 0.94rem;
-  outline: none;
-}
-
-.search-wrap input::placeholder {
-  color: rgba(148, 163, 184, 0.7);
-}
-
-.search-wrap input:focus {
-  border-color: rgba(96, 165, 250, 0.7);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-.grid-panel {
-  margin-top: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 24px;
-  overflow: hidden;
-  background: rgba(15, 23, 42, 0.72);
-  box-shadow: 0 18px 55px rgba(2, 6, 23, 0.2);
-}
-
+﻿/* Third-party BI-Grid and Kendo component overrides. Application layout is Tailwind-only. */
 .grid-panel BI-Grid {
   display: block;
   background: transparent;
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(2, 6, 23, 0.7);
-  backdrop-filter: blur(6px);
-}
-
-.modal-card {
-  width: min(100%, 560px);
-  border-radius: 24px;
-  background: #0f172a;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  box-shadow: 0 30px 80px rgba(2, 6, 23, 0.7);
-  overflow: hidden;
-}
-
-.modal-card.qr {
-  width: min(100%, 720px);
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 22px 24px 18px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.4rem;
-  letter-spacing: -0.04em;
-  color: #f8fafc;
-}
-
-.close-btn {
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(148, 163, 184, 0.08);
-  color: rgba(226, 232, 240, 0.9);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.35rem;
-  line-height: 1;
-  padding: 0;
-  font-weight: 700;
-}
-
-.modal-body {
-  padding: 22px 24px 16px;
-}
-
-.form-grid {
-  display: grid;
-  gap: 16px;
-}
-
-.field {
-  display: grid;
-  gap: 8px;
-}
-
-.field label {
-  color: rgba(226, 232, 240, 0.9);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.field input,
-.field select {
-  width: 100%;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.74);
-  color: #f8fafc;
-  height: 48px;
-  padding: 0 14px;
-  font-size: 0.94rem;
-  outline: none;
-}
-
-.field input:focus,
-.field select:focus {
-  border-color: rgba(96, 165, 250, 0.8);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 0 24px 24px;
 }
 
 .qr-dialog-container {
@@ -344,103 +31,7 @@
   background: transparent !important;
 }
 
-.qr-dialog {
-  display: flex;
-  gap: 28px;
-  padding: 20px 24px 6px;
-  align-items: flex-start;
-  background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
-  color: #e2e8f0;
-}
-
-.qr-dialog-header {
-  background: #0b1220 !important;
-  color: #f8fafc !important;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.14) !important;
-}
-
-.qr-close-btn {
-  border: none;
-  background: rgba(148, 163, 184, 0.08);
-  color: #e2e8f0;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  font-size: 1.15rem;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-}
-
-.qr-left {
-  flex: 0 0 260px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.qr-right {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.qr-image-wrap {
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 14px;
-  box-shadow: 0 10px 24px rgba(2,6,23,0.4);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-.qr-image {
-  width: 220px;
-  height: 220px;
-  object-fit: contain;
-  border-radius: 8px;
-  background: #ffffff;
-  padding: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
-}
-
-.qr-small-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-  width: 100%;
-  justify-content: center;
-}
-
-.qr-summary {
-  display: grid;
-  gap: 10px;
-}
-
-.summary-item {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: 1rem;
-  color: rgba(226, 232, 240, 0.95);
-}
-
-.summary-item strong {
-  color: #f8fafc;
-}
-
-/* remove older qr-actions usage */
-.qr-actions { display:none; }
-
-/* BI-Nav theming wrapper: override bi-modules / Kendo CSS variables locally so the nav matches the dark SalesBuzz theme */
 .bi-nav-wrapper {
-  /* Kendo / BI theme variables - tuned for dark navy */
   --kendo-color-app-surface: #0b1220;
   --kendo-color-on-app-surface: #e2e8f0;
   --kendo-color-surface: #0f172a;
@@ -454,7 +45,6 @@
   --kendo-color-base-subtle: rgba(148,163,184,0.06);
 }
 
-/* Scope the variables to the BI-Nav element and all child Kendo elements */
 :host ::ng-deep .bi-nav-wrapper BI-Nav,
 :host ::ng-deep .bi-nav-wrapper .bi-nav,
 :host ::ng-deep .bi-nav-wrapper .k-button,
@@ -465,19 +55,48 @@
   color: var(--kendo-color-on-app-surface) !important;
 }
 
-/* Make the BI-Nav visual look like a native toolbar */
-:host ::ng-deep .bi-nav-wrapper BI-Nav {
-  display: block;
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  /* Match the products container visual (dark navy surface) */
-  background: #020817 !important;
-  border: 1px solid rgba(148,163,184,0.06) !important;
-  box-shadow: 0 8px 20px rgba(2,6,23,0.35) !important;
+:host ::ng-deep .bi-nav-wrapper BI-Nav,
+:host ::ng-deep .bi-nav-wrapper bi-nav,
+:host ::ng-deep .bi-nav-wrapper .bi-nav,
+:host ::ng-deep .bi-nav-wrapper .k-toolbar {
+  background-color: #020817 !important;
+  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
+  position: relative !important;
+  z-index: 10 !important;
 }
 
-/* Ensure icons and images are visible and sized appropriately */
+:host ::ng-deep .bi-nav-wrapper BI-Nav {
+  display: block;
+  width: min(100%, 1000px);
+  padding: 8px 12px;
+  border: 1px solid rgba(148,163,184,0.16) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper BI-Nav .bi-nav-header,
+:host ::ng-deep .bi-nav-wrapper BI-Nav .nav-favorite-btn,
+:host ::ng-deep .bi-nav-wrapper BI-Nav .nav-star-btn,
+:host ::ng-deep .bi-nav-wrapper BI-Nav .nav-projection,
+:host ::ng-deep .bi-nav-wrapper BI-Nav .k-button.nav-edit-btn {
+  display: none !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper BI-Nav .k-toolbar,
+:host ::ng-deep .bi-nav-wrapper BI-Nav .k-toolbar.k-grid-toolbar,
+:host ::ng-deep .bi-nav-wrapper BI-Nav .k-toolbar.k-toolbar,
+:host ::ng-deep .bi-nav-wrapper BI-Nav .k-grid-toolbar {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper * {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
 :host ::ng-deep .bi-nav-wrapper img {
   width: 18px !important;
   height: 18px !important;
@@ -485,115 +104,28 @@
   filter: none !important;
 }
 
-/* Ensure toolbar background and inner containers are dark and do not block pointer events */
 :host ::ng-deep .bi-nav-wrapper .k-toolbar,
 :host ::ng-deep .bi-nav-wrapper .k-toolbar .k-button-group,
-:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-button {
+:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-button,
+:host ::ng-deep .bi-nav-wrapper .k-tool-group,
+:host ::ng-deep .bi-nav-wrapper .k-tool-area {
   background: transparent !important;
   color: var(--kendo-color-on-app-surface) !important;
   pointer-events: auto !important;
 }
 
-/* Force internal toolbar panels to use dark surface */
-:host ::ng-deep .bi-nav-wrapper .k-tool-group,
-:host ::ng-deep .bi-nav-wrapper .k-tool-area,
-:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-button {
-  background: transparent !important;
-}
-
-/* Remove any large white background elements inside BI-Nav */
-:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-widget,
-:host ::ng-deep .bi-nav-wrapper .k-toolbar .k-toolbar {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-/* Strong overrides: force any white backgrounds inside the BI-Nav wrapper to be transparent so the dark wrapper shows through.
-   This fixes third-party styles that render a white toolbar container. Keep scoped to the wrapper only. */
-:host ::ng-deep .bi-nav-wrapper * {
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-/* Ensure toolbar itself is dark and anchored in flow (not fixed) so page scroll works */
-:host ::ng-deep .bi-nav-wrapper BI-Nav,
-:host ::ng-deep .bi-nav-wrapper bi-nav,
-:host ::ng-deep .bi-nav-wrapper .bi-nav,
 :host ::ng-deep .bi-nav-wrapper .k-toolbar {
-  background-color: #020817 !important; /* near-black */
-  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
-  position: relative !important;
-  z-index: 10 !important;
-}
-:host ::ng-deep .bi-nav-wrapper bi-nav,
-:host ::ng-deep .bi-nav-wrapper BI-Nav {
-  background-color: #020817 !important;
-  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
-  border-radius: 12px !important;
-}
-
-/* Ensure page content can scroll when BI-Nav present */
-.products-shell,
-.bi-nav-wrapper {
-  width: 100%;
-  margin: 0 0 18px;
-  display: flex;
-  justify-content: flex-start;
-}
-
-.bi-nav-wrapper BI-Nav {
-  display: block;
-  width: min(100%, 1000px);
-  background: transparent !important;
-  border: 1px solid rgba(148, 163, 184, 0.16) !important;
-  border-radius: 16px !important;
-  box-shadow: none !important;
-}
-
-.bi-nav-wrapper BI-Nav .bi-nav-header,
-.bi-nav-wrapper BI-Nav [class*="title"],
-.bi-nav-wrapper BI-Nav [class*="page-title"],
-.bi-nav-wrapper BI-Nav [class*="favorite"],
-.bi-nav-wrapper BI-Nav [class*="star"],
-.bi-nav-wrapper BI-Nav .nav-projection,
-.bi-nav-wrapper BI-Nav .k-button.nav-edit-btn {
-  display: none !important;
-}
-
-.bi-nav-wrapper BI-Nav .k-toolbar,
-.bi-nav-wrapper BI-Nav .k-toolbar.k-grid-toolbar,
-.bi-nav-wrapper BI-Nav .k-toolbar.k-toolbar,
-.bi-nav-wrapper BI-Nav .k-grid-toolbar {
-  background: transparent !important;
+  gap: 8px !important;
+  align-items: center !important;
   border: 0 !important;
-  box-shadow: none !important;
 }
 
-.products-wrap {
-  /* Allow normal document flow scrolling so the entire page can be reached */
-  overflow: visible !important;
-}
-
-/* Ensure buttons are clickable and above internal non-interactive layers */
 :host ::ng-deep .bi-nav-wrapper button,
 :host ::ng-deep .bi-nav-wrapper .k-button {
   pointer-events: auto !important;
   z-index: 20 !important;
-}
-
-/* If there are overlay panels placed above toolbar, lower their z-index inside the wrapper */
-:host ::ng-deep .bi-nav-wrapper .overlay,
-:host ::ng-deep .bi-nav-wrapper .k-overlay {
-  z-index: 1 !important;
-}
-
-/* Buttons appearance */
-:host ::ng-deep .bi-nav-wrapper .k-button,
-:host ::ng-deep .bi-nav-wrapper button {
   border-radius: 10px !important;
   padding: 8px 10px !important;
-  background: transparent !important;
   color: var(--kendo-color-on-app-surface) !important;
   border: 1px solid rgba(148,163,184,0.04) !important;
 }
@@ -604,22 +136,18 @@
   color: #ffffff !important;
 }
 
-/* Style for the projected edit button so it matches the nav appearance */
-.nav-projection { display: inline-flex; align-items: center; }
-.nav-edit-btn {
-  border-radius: 8px !important;
-  padding: 6px 10px !important;
-  background: transparent !important;
-  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
-  border: 1px solid rgba(148,163,184,0.04) !important;
-  margin-left: 6px;
+:host ::ng-deep .bi-nav-wrapper .overlay,
+:host ::ng-deep .bi-nav-wrapper .k-overlay {
+  z-index: 1 !important;
 }
-.nav-edit-btn:hover { background: rgba(37,99,235,0.12) !important; color:#fff !important; }
 
-/* Fix spacing for toolbar groups */
+:host ::ng-deep .bi-nav-wrapper .overlay-blocker,
+:host ::ng-deep .bi-nav-wrapper .inset-overlay,
+:host ::ng-deep .bi-nav-wrapper .toolbar-overlay {
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
 
-/* Emergency overrides: target BI-Nav internal classes to remove the white full-width bar and unblock clicks.
-   These are intentionally specific and scoped to .bi-nav-wrapper to avoid affecting other pages. */
 :host ::ng-deep .bi-nav-wrapper .nav-btns-container,
 :host ::ng-deep .bi-nav-wrapper .holder,
 :host ::ng-deep .bi-nav-wrapper .scroll-left,
@@ -642,85 +170,12 @@
   padding: 6px 8px !important;
 }
 
-/* Force Kendo button surfaces transparent */
-:host ::ng-deep .bi-nav-wrapper .k-button,
-:host ::ng-deep .bi-nav-wrapper .k-button .k-button-icon,
-:host ::ng-deep .bi-nav-wrapper .k-button .k-button-iconimage,
-:host ::ng-deep .bi-nav-wrapper .k-button .k-button-text {
-  background: transparent !important;
-  color: var(--kendo-color-on-app-surface, #e2e8f0) !important;
-  border: none !important;
-}
-
-/* Remove any large block element that may be covering the toolbar */
 :host ::ng-deep .bi-nav-wrapper > div[role],
 :host ::ng-deep .bi-nav-wrapper > div > div {
   background: transparent !important;
 }
 
-/* As a fallback, if something is still overlaying the toolbar, make it pointer-events:none so buttons become clickable */
-:host ::ng-deep .bi-nav-wrapper .overlay-blocker,
-:host ::ng-deep .bi-nav-wrapper .inset-overlay,
-:host ::ng-deep .bi-nav-wrapper .toolbar-overlay {
-  pointer-events: none !important;
-  opacity: 0 !important;
-}
-
-:host ::ng-deep .bi-nav-wrapper .k-toolbar {
-  gap: 8px !important;
-  align-items: center !important;
-}
-
-/* Prevent broken-image icon from being too large; if any icon still broken it'll be small and not push layout */
 :host ::ng-deep .bi-nav-wrapper img[alt] {
   min-width: 18px;
   min-height: 18px;
-}
-
-
-@media (max-width: 700px) {
-  .qr-dialog { flex-direction: column; align-items:center; }
-  .qr-left { width:100%; }
-  .qr-image { width:180px; height:180px; padding:10px; }
-  .qr-small-actions { justify-content: stretch; }
-  .qr-small-actions > * { flex:1; }
-}
-
-@media (max-width: 700px) {
-  .top-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 18px;
-  padding: 24px 26px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 26px;
-  background: rgba(15, 23, 42, 0.72);
-  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.28);
-}
-
-
-
-.bi-nav-wrapper {
-  width: 100%;
-  background: transparent;
-}
-
-.bi-nav-wrapper BI-Nav,
-.bi-nav-wrapper ::ng-deep BI-Nav,
-.bi-nav-wrapper BI-Nav .k-toolbar,
-.bi-nav-wrapper ::ng-deep BI-Nav .k-toolbar,
-.bi-nav-wrapper BI-Nav .k-grid-toolbar,
-.bi-nav-wrapper ::ng-deep BI-Nav .k-grid-toolbar {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-
-
-
-
-
 }

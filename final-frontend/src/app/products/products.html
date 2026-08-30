@@ -1,168 +1,83 @@
-﻿<div class="products-shell">
-  <div class="products-wrap">
-    <header class="top-panel">
-      <div class="header-copy">
-        <p class="eyebrow">SalesBuzz</p>
-        <h1>Products</h1>
-        <p>Manage your products and inventory.</p>
+<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,.1),transparent_26%),#020817] px-[18px] py-8 pb-[52px] text-slate-200">
+  <div class="mx-auto max-w-[1280px]">
+    <header class="flex flex-col items-start gap-[18px] rounded-[26px] !border !border-slate-400/15 bg-slate-900/70 px-[26px] py-6 shadow-[0_18px_50px_rgba(2,6,23,.28)]">
+      <div class="min-w-[220px]">
+        <p class="m-0 text-[.72rem] font-bold uppercase tracking-[.18em] text-sky-300">SalesBuzz</p>
+        <h1 class="mt-2 hidden text-[clamp(2.2rem,1vw+1.6rem,3rem)] leading-tight tracking-[-.06em] text-slate-50">Products</h1>
+        <p class="mt-2 text-[.96rem] text-slate-400/80">Manage your products and inventory.</p>
       </div>
 
+      <div class="bi-nav-wrapper mb-4 flex w-full items-center justify-between">
+        <BI-Nav *ngIf="isAdmin && navReady && showBiNav"
+                [BIGrid]="grid!"
+                [navButtons]="navButtons"
+                [CanInsert]="isAdmin"
+                [CanUpdate]="isAdmin"
+                [CanDelete]="isAdmin"
+                [CanSave]="isAdmin"
+                [CanViewAttachments]="isAdmin"
+                [CanAddAttachments]="isAdmin"
+                DomID="Products_Grid"
+                PageTitle=""
+                (ActionClicked)="handleNavAction($event)"></BI-Nav>
+      </div>
 
-
-<div class="w-full flex items-center justify-between mb-4 bi-nav-wrapper">
-  <BI-Nav *ngIf="isAdmin && grid && showBiNav"
-          [BIGrid]="grid"
-          [navButtons]="navButtons"
-          [CanInsert]="isAdmin"
-          [CanUpdate]="isAdmin"
-          [CanDelete]="isAdmin"
-          [CanSave]="isAdmin"
-          [CanViewAttachments]="isAdmin"
-          [CanAddAttachments]="isAdmin"
-          DomID="Products_Grid"
-          PageTitle=""
-          (ActionClicked)="handleNavAction($event)"></BI-Nav>
-</div>
-
-      <div class="action-row">
-        <button type="button" class="secondary-btn" (click)="refresh()">Refresh</button>
-        <button type="button" class="primary-btn" (click)="openQuickOrderModal()">Quick Order</button>
+      <div class="flex flex-wrap justify-start gap-3">
+        <button type="button" class="rounded-[14px] !border !border-blue-400/20 bg-blue-600/15 px-4 py-[11px] text-[.85rem] font-bold text-slate-200 transition hover:-translate-y-px" (click)="refresh()">Refresh</button>
+        <button type="button" class="rounded-[14px] !border-0 bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-[11px] text-[.85rem] font-bold text-white shadow-[0_12px_20px_rgba(37,99,235,.22)] transition hover:-translate-y-px" (click)="openQuickOrderModal()">Quick Order</button>
       </div>
     </header>
 
-    <div class="search-block">
-      <div class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="mt-[22px] flex items-center gap-3">
+      <div class="relative flex-1">
+        <svg class="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="6"></circle>
           <path stroke-linecap="round" d="M16 16l5 5"></path>
         </svg>
-        <input
-          type="text"
-          [(ngModel)]="searchValue"
-          (input)="searchProducts($event)"
-          placeholder="Search by ID or name..."
-        />
+        <input class="h-[52px] w-full rounded-2xl !border !border-slate-400/15 bg-slate-900/70 pl-11 pr-4 text-[.94rem] text-slate-50 outline-none placeholder:text-slate-400/70 focus:!border-blue-400/70 focus:ring-4 focus:ring-blue-500/10"
+               type="text" [(ngModel)]="searchValue" (input)="searchProducts($event)" placeholder="Search by ID or name..." />
       </div>
-
-      <button *ngIf="searchValue" type="button" class="ghost-btn" (click)="clearSearch()">Clear</button>
+      <button *ngIf="searchValue" type="button" class="rounded-[14px] !border !border-slate-400/15 bg-slate-400/10 px-4 py-[11px] text-[.85rem] font-bold text-slate-200 transition hover:-translate-y-px" (click)="clearSearch()">Clear</button>
     </div>
 
-    <div class="grid-panel">
-      <BI-Grid
-        #productsGrid
-        [DataService]="dataSource"
-        [changeSet]="changeSetBinding"
-        [Columns]="columns"
-        [GridName]="'Products'"
-        [DomID]="'Products_Grid'"
-        [HasPaging]="true"
-        [height]="500"
-      >
-      </BI-Grid>
+    <div class="grid-panel mt-[22px] overflow-hidden rounded-3xl !border !border-slate-400/15 bg-slate-900/70 shadow-[0_18px_55px_rgba(2,6,23,.2)]">
+      <BI-Grid #productsGrid [DataService]="dataSource" [changeSet]="changeSetBinding" [Columns]="columns" [GridName]="'Products'" [DomID]="'Products_Grid'" [HasPaging]="true" [height]="500"></BI-Grid>
     </div>
   </div>
 
-  <div *ngIf="showModal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2>{{ editingId ? 'Edit Product' : 'Add Product' }}</h2>
-        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close">×</button>
+  <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-5 backdrop-blur-[6px]">
+    <div class="w-full max-w-[560px] overflow-hidden rounded-3xl border border-slate-400/15 bg-slate-900 shadow-[0_30px_80px_rgba(2,6,23,.7)]">
+      <div class="flex items-center justify-between gap-3 border-b border-slate-400/10 px-6 pb-[18px] pt-[22px]">
+        <h2 class="m-0 text-[1.4rem] tracking-[-.04em] text-slate-50">{{ editingId ? 'Edit Product' : 'Add Product' }}</h2>
+        <button type="button" class="grid h-9 w-9 place-items-center rounded-full !border-0 bg-slate-400/10 p-0 text-[1.35rem] font-bold leading-none text-slate-200/90" (click)="closeModal()" aria-label="Close">×</button>
       </div>
-
-      <div class="modal-body">
-        <div class="form-grid">
-          <div class="field">
-            <label>Name</label>
-            <input [(ngModel)]="modalProduct.name" placeholder="Product name" />
-          </div>
-
-          <div class="field">
-            <label>Price</label>
-            <input type="number" [(ngModel)]="modalProduct.price" min="0" step="0.01" />
-          </div>
-
-          <div class="field">
-            <label>Quantity</label>
-            <input type="number" [(ngModel)]="modalProduct.quantity" min="0" step="1" />
-          </div>
+      <div class="px-6 pb-4 pt-[22px]">
+        <div class="grid gap-4">
+          <div class="grid gap-2"><label class="text-[.8rem] font-semibold text-slate-200/90">Name</label><input class="h-12 w-full rounded-[14px] border border-slate-400/15 bg-slate-900/75 px-3.5 text-[.94rem] text-slate-50 outline-none focus:border-blue-400/80 focus:ring-4 focus:ring-blue-500/10" [(ngModel)]="modalProduct.name" placeholder="Product name" /></div>
+          <div class="grid gap-2"><label class="text-[.8rem] font-semibold text-slate-200/90">Price</label><input class="h-12 w-full rounded-[14px] border border-slate-400/15 bg-slate-900/75 px-3.5 text-[.94rem] text-slate-50 outline-none focus:border-blue-400/80 focus:ring-4 focus:ring-blue-500/10" type="number" [(ngModel)]="modalProduct.price" min="0" step="0.01" /></div>
+          <div class="grid gap-2"><label class="text-[.8rem] font-semibold text-slate-200/90">Quantity</label><input class="h-12 w-full rounded-[14px] border border-slate-400/15 bg-slate-900/75 px-3.5 text-[.94rem] text-slate-50 outline-none focus:border-blue-400/80 focus:ring-4 focus:ring-blue-500/10" type="number" [(ngModel)]="modalProduct.quantity" min="0" step="1" /></div>
         </div>
       </div>
-
-      <div class="modal-actions">
-        <button type="button" class="ghost-btn" (click)="closeModal()">Cancel</button>
-        <button type="button" class="primary-btn" (click)="submitModal()">
-          {{ editingId ? 'Save Changes' : 'Create Product' }}
-        </button>
+      <div class="flex justify-end gap-3 px-6 pb-6">
+        <button type="button" class="rounded-[14px] border border-slate-400/15 bg-slate-400/10 px-4 py-[11px] text-[.85rem] font-bold text-slate-200" (click)="closeModal()">Cancel</button>
+        <button type="button" class="rounded-[14px] !border-0 bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-[11px] text-[.85rem] font-bold text-white" (click)="submitModal()">{{ editingId ? 'Save Changes' : 'Create Product' }}</button>
       </div>
     </div>
   </div>
 
-  <div *ngIf="showQuickOrderModal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2>Place quick order</h2>
-        <button type="button" class="close-btn" (click)="closeQuickOrderModal()" aria-label="Close">×</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="form-grid">
-          <div class="field">
-            <label for="quickProduct">Product</label>
-            <select id="quickProduct" [(ngModel)]="selectedProductId">
-              <option [ngValue]="0" disabled>Select a product</option>
-              <option *ngFor="let product of quickOrderProducts" [ngValue]="product.id">
-                {{ product.name }} ({{ product.quantity }} available)
-              </option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="orderQuantity">Quantity</label>
-            <input id="orderQuantity" type="number" [(ngModel)]="orderQuantity" min="1" step="1" />
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" class="ghost-btn" (click)="closeQuickOrderModal()">Cancel</button>
-        <button type="button" class="primary-btn" (click)="submitQuickOrder()">Create order</button>
-      </div>
+  <div *ngIf="showQuickOrderModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-5 backdrop-blur-[6px]">
+    <div class="w-full max-w-[560px] overflow-hidden rounded-3xl border border-slate-400/15 bg-slate-900 shadow-[0_30px_80px_rgba(2,6,23,.7)]">
+      <div class="flex items-center justify-between gap-3 border-b border-slate-400/10 px-6 pb-[18px] pt-[22px]"><h2 class="m-0 text-[1.4rem] tracking-[-.04em] text-slate-50">Place quick order</h2><button type="button" class="grid h-9 w-9 place-items-center rounded-full !border-0 bg-slate-400/10 p-0 text-[1.35rem] font-bold leading-none text-slate-200/90" (click)="closeQuickOrderModal()" aria-label="Close">×</button></div>
+      <div class="px-6 pb-4 pt-[22px]"><div class="grid gap-4"><div class="grid gap-2"><label for="quickProduct" class="text-[.8rem] font-semibold text-slate-200/90">Product</label><select id="quickProduct" class="h-12 w-full rounded-[14px] border border-slate-400/15 bg-slate-900/75 px-3.5 text-[.94rem] text-slate-50 outline-none" [(ngModel)]="selectedProductId"><option [ngValue]="0" disabled>Select a product</option><option *ngFor="let product of quickOrderProducts" [ngValue]="product.id">{{ product.name }} ({{ product.quantity }} available)</option></select></div><div class="grid gap-2"><label for="orderQuantity" class="text-[.8rem] font-semibold text-slate-200/90">Quantity</label><input id="orderQuantity" class="h-12 w-full rounded-[14px] border border-slate-400/15 bg-slate-900/75 px-3.5 text-[.94rem] text-slate-50 outline-none" type="number" [(ngModel)]="orderQuantity" min="1" step="1" /></div></div></div>
+      <div class="flex justify-end gap-3 px-6 pb-6"><button type="button" class="rounded-[14px] border border-slate-400/15 bg-slate-400/10 px-4 py-[11px] text-[.85rem] font-bold text-slate-200" (click)="closeQuickOrderModal()">Cancel</button><button type="button" class="rounded-[14px] !border-0 bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-[11px] text-[.85rem] font-bold text-white" (click)="submitQuickOrder()">Create order</button></div>
     </div>
   </div>
 
   <kendo-dialog *ngIf="showQrModal && latestOrderSummary" (close)="closeQrModal()" width="760" class="qr-dialog-container">
-    <kendo-dialog-titlebar class="qr-dialog-header">
-      <span>Order created</span>
-      <button type="button" class="qr-close-btn" (click)="closeQrModal()" aria-label="Close">×</button>
-    </kendo-dialog-titlebar>
-
-    <div class="qr-dialog dark-qr-dialog">
-      <div class="qr-left">
-        <div class="qr-image-wrap">
-          <img [src]="latestOrderSummary.qrUrl" alt="Order QR code" class="qr-image" />
-        </div>
-        <div class="qr-small-actions">
-          <button kendoButton class="primary-btn" (click)="printQr()">Print</button>
-          <a kendoButton class="secondary-btn" [href]="latestOrderSummary.qrUrl" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Open QR</a>
-        </div>
-      </div>
-
-      <div class="qr-right">
-        <div class="summary-item"><strong>Order ID:</strong> {{ latestOrderSummary.id }}</div>
-        <div class="summary-item"><strong>Product:</strong> {{ latestOrderSummary.productName }}</div>
-        <div class="summary-item"><strong>Quantity:</strong> {{ latestOrderSummary.quantity }}</div>
-        <div class="summary-item"><strong>Total:</strong> {{ latestOrderSummary.totalPrice | currency }}</div>
-        <div class="summary-item"><strong>Date:</strong> {{ latestOrderSummary.orderDate | date: 'medium' }}</div>
-
-        <div style="margin-top:18px;">
-          <button kendoButton class="ghost-btn" (click)="closeQrModal()">Close</button>
-        </div>
-      </div>
+    <kendo-dialog-titlebar><span>Order created</span><button type="button" class="grid h-8 w-8 place-items-center rounded-full !border-0 bg-slate-400/10 p-0 text-lg text-slate-200" (click)="closeQrModal()" aria-label="Close">×</button></kendo-dialog-titlebar>
+    <div class="flex items-start gap-7 bg-gradient-to-b from-[#0b1220] to-slate-900 px-6 pb-1 pt-5 text-slate-200 max-[700px]:flex-col max-[700px]:items-center">
+      <div class="flex basis-[260px] flex-col items-center max-[700px]:w-full"><div class="grid place-items-center rounded-xl border border-slate-400/20 bg-white p-3.5 shadow-[0_10px_24px_rgba(2,6,23,.4)]"><img [src]="latestOrderSummary.qrUrl" alt="Order QR code" class="h-[220px] w-[220px] rounded-lg border border-slate-900/10 bg-white p-2.5 object-contain shadow-[inset_0_0_0_1px_rgba(15,23,42,.04)] max-[700px]:h-[180px] max-[700px]:w-[180px]" /></div><div class="mt-3.5 flex w-full justify-center gap-2.5 max-[700px]:[&>*]:flex-1"><button kendoButton class="rounded-[14px] border-0 bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-[11px] text-[.85rem] font-bold text-white" (click)="printQr()">Print</button><a kendoButton class="inline-flex items-center justify-center rounded-[14px] border border-blue-400/20 bg-blue-600/15 px-4 py-[11px] text-[.85rem] font-bold text-slate-200 no-underline" [href]="latestOrderSummary.qrUrl" target="_blank">Open QR</a></div></div>
+      <div class="flex flex-1 flex-col gap-2.5"><div class="flex flex-wrap gap-1.5 text-base text-slate-200/95"><strong class="text-slate-50">Order ID:</strong> {{ latestOrderSummary.id }}</div><div class="flex flex-wrap gap-1.5 text-base text-slate-200/95"><strong class="text-slate-50">Product:</strong> {{ latestOrderSummary.productName }}</div><div class="flex flex-wrap gap-1.5 text-base text-slate-200/95"><strong class="text-slate-50">Quantity:</strong> {{ latestOrderSummary.quantity }}</div><div class="flex flex-wrap gap-1.5 text-base text-slate-200/95"><strong class="text-slate-50">Total:</strong> {{ latestOrderSummary.totalPrice | currency }}</div><div class="flex flex-wrap gap-1.5 text-base text-slate-200/95"><strong class="text-slate-50">Date:</strong> {{ latestOrderSummary.orderDate | date: 'medium' }}</div><div class="mt-[18px]"><button kendoButton class="rounded-[14px] border border-slate-400/15 bg-slate-400/10 px-4 py-[11px] text-[.85rem] font-bold text-slate-200" (click)="closeQrModal()">Close</button></div></div>
     </div>
   </kendo-dialog>
 </div>
-
-
-
-
-

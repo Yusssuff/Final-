@@ -9,6 +9,10 @@
   --kendo-dialog-text: #e2e8f0;
 }
 
+:host ::ng-deep .qr-dialog-container .k-dialog-titlebar-actions {
+  display: none !important;
+}
+
 :host ::ng-deep .k-dialog,
 :host ::ng-deep .k-window,
 :host ::ng-deep .k-window-content,

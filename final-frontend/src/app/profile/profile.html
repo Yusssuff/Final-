@@ -73,7 +73,7 @@
                 <td class="px-3 py-3 text-slate-100">#{{ o.id }}</td>
                 <td class="px-3 py-3">{{ o.product?.name }}</td>
                 <td class="px-3 py-3">{{ o.quantity }}</td>
-                <td class="px-3 py-3">{{ o.totalPrice | currency }}</td>
+                <td class="px-3 py-3">{{ o.totalPrice | currency:'EGP':'code' }}</td>
                 <td class="px-3 py-3">{{ o.orderDate | date:'short' }}</td>
                 <td class="px-3 py-3">
                   <div class="flex gap-2">
@@ -108,7 +108,7 @@
             <div class="space-y-2 text-sm text-slate-300">
               <p><span class="font-medium text-slate-200">ID:</span> {{ orders[0]?.id ?? '—' }}</p>
               <p><span class="font-medium text-slate-200">Product:</span> {{ orders[0]?.product?.name ?? '—' }}</p>
-              <p><span class="font-medium text-slate-200">Total:</span> {{ orders[0]?.totalPrice | currency }}</p>
+              <p><span class="font-medium text-slate-200">Total:</span> {{ orders[0]?.totalPrice | currency:'EGP':'code' }}</p>
             </div>
           </div>
         </div>

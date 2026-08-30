@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { BehaviorSubject, Observable, forkJoin } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin, map } from 'rxjs';
 
 import { ControlTypes, DataTypes, IDataSource } from 'bi-interfaces';
 
@@ -59,7 +59,7 @@ export class ProductsDataSource
       DataType: DataTypes.Text,
       Length: 150,
       controlType: ControlTypes.Text,
-      IsEditable: false,
+      IsEditable: true,
       IsFilterable: true,
       IsVisible: true,
       DefaultValue: '',
@@ -70,7 +70,7 @@ export class ProductsDataSource
       DisplayName: 'Price',
       DataType: DataTypes.Text,
       controlType: ControlTypes.Text,
-      IsEditable: false,
+      IsEditable: true,
       IsFilterable: true,
       IsVisible: true,
       DefaultValue: '',
@@ -81,7 +81,7 @@ export class ProductsDataSource
       DisplayName: 'Quantity',
       DataType: DataTypes.Text,
       controlType: ControlTypes.Text,
-      IsEditable: false,
+      IsEditable: true,
       IsFilterable: true,
       IsVisible: true,
       DefaultValue: '',
@@ -191,7 +191,11 @@ export class ProductsDataSource
   }
 
   get(APIURL: string): Observable<any> {
-    return this.api.get<any>(APIURL);
+    return this.api.get<Product[]>(APIURL).pipe(
+      map((products) => ({
+        value: Array.isArray(products) ? products : [],
+      })),
+    );
   }
 
   add(data: any): Observable<any> {
@@ -206,9 +210,16 @@ export class ProductsDataSource
   }
 
   patch(data: any, id: string): Observable<any> {
-    return this.api.patch<any>(
+    const existingProduct = this.data.find(
+      (product) => String(product.id) === String(id),
+    );
+    const completeProduct = existingProduct
+      ? { ...existingProduct, ...data, id: existingProduct.id }
+      : data;
+
+    return this.api.put<any>(
       `${this.PUTAPIURL}/${encodeURIComponent(id)}`,
-      data,
+      completeProduct,
     );
   }
 

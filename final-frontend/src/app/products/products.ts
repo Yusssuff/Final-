@@ -138,7 +138,6 @@ export class Products implements OnInit, AfterViewInit {
     // If you want strict admin-only control, change disable back to !admin.
     return {
       add: { visibility: true, disable: false },
-      edit: { visibility: true, disable: false },
       save: { visibility: true, disable: false },
       delete: { visibility: true, disable: false },
       searchbar: { visibility: true },
@@ -182,14 +181,10 @@ export class Products implements OnInit, AfterViewInit {
         }
         break;
       case 'save':
-        // Let the grid handle save if available, otherwise call submitModal for local modal flows
-        if (this.grid && typeof (this.grid as any).Save === 'function') {
-          (this.grid as any).Save();
-        } else {
-          // fallback: if modal is open, try to submit it; otherwise no-op
-          if (this.showModal) {
-            this.submitModal();
-          }
+        // Save the product editor when BI-Nav Edit opened the modal.
+        // Otherwise BI-Nav completes its normal inline-grid save itself.
+        if (this.showModal) {
+          this.submitModal();
         }
         break;
       case 'delete':

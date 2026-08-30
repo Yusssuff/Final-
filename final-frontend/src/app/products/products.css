@@ -67,11 +67,14 @@
 
 :host ::ng-deep .bi-nav-wrapper BI-Nav {
   display: block;
-  width: min(100%, 1000px);
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
   padding: 8px 12px;
   border: 1px solid rgba(148,163,184,0.16) !important;
   border-radius: 16px !important;
   box-shadow: none !important;
+  overflow: visible !important;
 }
 
 :host ::ng-deep .bi-nav-wrapper BI-Nav .bi-nav-header,
@@ -118,6 +121,40 @@
   gap: 8px !important;
   align-items: center !important;
   border: 0 !important;
+  flex-wrap: wrap !important;
+  min-height: 42px !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper .nav-btns-container {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper .nav-btns-container .holder {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper .nav-btns-container .holder::-webkit-scrollbar {
+  display: none !important;
+}
+
+:host ::ng-deep .bi-nav-wrapper .nav-btns-container .holder > button {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
 }
 
 :host ::ng-deep .bi-nav-wrapper button,

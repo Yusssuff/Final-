@@ -1,7 +1,7 @@
 ﻿import { Injectable, inject } from '@angular/core';
 
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 import { PublicApiClient, PublicApiRequestOptions } from '@salesbuzz/public-sdk';
 
@@ -20,7 +20,14 @@ export class SalesBuzzApiClient extends PublicApiClient {
   }
 
   override put<T>(url: string, body: unknown, options?: PublicApiRequestOptions): Observable<T> {
-    return this.http.put<T>(this.buildUrl(url), body, this.buildOptions(options));
+    return this.http
+      .put(this.buildUrl(url), body, {
+        ...this.buildOptions(options),
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => (response.trim() ? response : ({} as T)) as T),
+      );
   }
 
   override patch<T>(url: string, body: unknown, options?: PublicApiRequestOptions): Observable<T> {

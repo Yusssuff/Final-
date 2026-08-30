@@ -220,12 +220,7 @@ namespace Final_Task.Controllers
 
             await _db.SaveChangesAsync();
 
-            // --------------------------------------------------------
-            // Assign the new user to the application's BU
-            //
-            // The BU comes from HH_SA_BU.
-            // We do not invent a BUID in code.
-            // --------------------------------------------------------
+
 
             var defaultBuid =
                 await GetDefaultBuidAsync();
@@ -401,7 +396,7 @@ namespace Final_Task.Controllers
                     "Bearer",
 
                 expiresIn =
-                    8 * 60 * 60,
+                    15 * 60,
 
                 user = new
                 {
@@ -860,7 +855,7 @@ namespace Final_Task.Controllers
                     notBefore:
                         DateTime.UtcNow,
                     expires:
-                        DateTime.UtcNow.AddHours(8),
+                        DateTime.UtcNow.AddMinutes(15),
                     signingCredentials:
                         credentials);
 

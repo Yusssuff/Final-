@@ -1,5 +1,5 @@
 ﻿import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, of, tap } from 'rxjs';
 
 import {
@@ -61,9 +61,7 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/change-password`, payload, { headers });
   }
 
-  /**
-   * Refresh the current user from the server and update local storage + observable.
-   */
+
   refreshCurrentUser(): Observable<MeResponse | null> {
     if (!this.getToken()) {
       this._currentUser.next(null);
@@ -88,11 +86,13 @@ export class AuthService {
           this._currentUser.next(null);
         }
       }),
-      catchError((_) => {
-        // On error, don't throw to consumers; clear auth state
-        localStorage.removeItem(this.tokenKey);
-        localStorage.removeItem(this.userKey);
-        this._currentUser.next(null);
+      catchError((error: HttpErrorResponse) => {
+        // Keep the cached session for transient server/network failures.
+        if (error.status === 401 || error.status === 403) {
+          localStorage.removeItem(this.tokenKey);
+          localStorage.removeItem(this.userKey);
+          this._currentUser.next(null);
+        }
         return of(null);
       }),
     );
@@ -105,7 +105,14 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    const token = localStorage.getItem(this.tokenKey);
+
+    if (token && this.isTokenExpired(token)) {
+      this.clearStoredSession();
+      return null;
+    }
+
+    return token;
   }
 
   private _readUserFromStorage(): AuthUser | null {
@@ -132,5 +139,35 @@ export class AuthService {
 
   isAdmin(): boolean {
     return this.getUser()?.role?.toLowerCase() === 'admin';
+  }
+
+  private isTokenExpired(token: string): boolean {
+    const parts = token.split('.');
+
+    if (parts.length !== 3) {
+      return true;
+    }
+
+    try {
+      const payload = JSON.parse(this.decodeBase64Url(parts[1])) as {
+        exp?: number;
+      };
+
+      return typeof payload.exp !== 'number' || payload.exp * 1000 <= Date.now();
+    } catch {
+      return true;
+    }
+  }
+
+  private decodeBase64Url(value: string): string {
+    const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    return atob(padded);
+  }
+
+  private clearStoredSession(): void {
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.userKey);
+    this._currentUser.next(null);
   }
 }

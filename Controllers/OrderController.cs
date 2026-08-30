@@ -287,9 +287,7 @@ namespace Final_Task.Controllers
             return Ok(order);
         }
 
-        // Duplicate GetMyOrders removed. The primary GetMyOrders implementation
-        // that includes SalesBuzz permission checks and BUID validation is
-        // declared above. Keeping a single route prevents duplicate endpoint definitions.
+
 
         // =========================================================
         // UPDATE ORDER

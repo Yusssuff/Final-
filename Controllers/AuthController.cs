@@ -357,12 +357,8 @@ namespace Final_Task.Controllers
 
             // --------------------------------------------------------
             // Get user's BUID
-            //
-            // IMPORTANT:
-            // HH_SA_UserBUPermissions.UserID contains
-            // the application user's ID as a string.
-            // --------------------------------------------------------
-
+            //---------------------------------------------------------
+            
             var buid =
                 await GetUserBuidAsync(
                     user.Id)

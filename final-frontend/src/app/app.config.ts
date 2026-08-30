@@ -1,87 +1,58 @@
-import {
-  ApplicationConfig,
-  importProvidersFrom
-} from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 
-import {
-  provideRouter
-} from '@angular/router';
+import { provideRouter } from '@angular/router';
 
-import {
-  provideHttpClient,
-  withInterceptors
-} from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
-import {
-  BrowserAnimationsModule
-} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import {
-  TranslateModule
-} from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 import {
   CreateDialog,
   PublicApiClient,
-  PublicSdkModule
+  PublicSdkModule,
 } from '@salesbuzz/public-sdk';
 
-import {
-  NavInfo
-} from 'bi-interfaces';
+import { NavInfo } from 'bi-interfaces';
 
-import {
-  routes
-} from './app.routes';
+import { routes } from './app.routes';
 
-import {
-  authInterceptor
-} from './auth/auth.interceptor';
+import { authInterceptor } from './auth/auth.interceptor';
 
-import {
-  SalesBuzzApiClient
-} from './sdk-api-client';
+import { SalesBuzzApiClient } from './sdk-api-client';
 
 export const appConfig: ApplicationConfig = {
-
   providers: [
-
     provideRouter(routes),
 
-    provideHttpClient(
-      withInterceptors([
-        authInterceptor
-      ])
-    ),
+    provideHttpClient(withInterceptors([authInterceptor])),
 
     importProvidersFrom(
       BrowserAnimationsModule,
       TranslateModule.forRoot(),
-      PublicSdkModule
+      PublicSdkModule,
     ),
 
     {
       provide: PublicApiClient,
-      useClass: SalesBuzzApiClient
+      useClass: SalesBuzzApiClient,
     },
 
     {
       provide: 'CreateDialog',
       useFactory: () => {
-        const dialog =
-          new CreateDialog();
+        const dialog = new CreateDialog();
 
         return () => dialog;
-      }
+      },
     },
 
     {
       provide: NavInfo,
       useValue: {
-        getBUDesc: (
-          buid: string
-        ) => buid
-      }
-    }
-  ]
+        getBUDesc: (buid: string) => buid,
+      },
+    },
+  ],
 };

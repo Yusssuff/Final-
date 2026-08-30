@@ -133,9 +133,7 @@ export class Products implements OnInit, AfterViewInit {
 
   get navButtons(): any {
     const admin = this.isAdmin;
-    // Enable primary nav buttons to be interactive in the UI. Keep visibility controlled by admin,
-    // but ensure buttons are clickable for demonstration and for users who need them.
-    // If you want strict admin-only control, change disable back to !admin.
+
     return {
       add: { visibility: true, disable: false },
       save: { visibility: true, disable: false },
@@ -144,8 +142,7 @@ export class Products implements OnInit, AfterViewInit {
     };
   }
 
-  // Handle actions emitted by the BI-Nav toolbar. The nav emits objects like
-  // { action: 'add' | 'save' | 'delete' | 'cancel' | 'searchbar' | 'historyData' | 'workFlow', ... }
+
   handleNavAction(event: any): void {
     console.debug('BI-Nav ActionClicked event:', event);
     if (!event || !event.action) {

@@ -7,8 +7,8 @@
         <p class="mt-2 text-[.96rem] text-slate-400/80">Manage your products and inventory.</p>
       </div>
 
-      <div class="bi-nav-wrapper mb-4 flex w-full items-center justify-between">
-        <BI-Nav *ngIf="isAdmin && navReady && showBiNav"
+      <div *ngIf="isAdmin && navReady && showBiNav" class="bi-nav-wrapper mb-4 flex w-full items-center justify-between">
+        <BI-Nav
                 [BIGrid]="grid!"
                 [navButtons]="navButtons"
                 [CanInsert]="isAdmin"
@@ -22,9 +22,9 @@
                 (ActionClicked)="handleNavAction($event)"></BI-Nav>
       </div>
 
-      <div class="flex flex-wrap justify-start gap-3">
-        <button type="button" class="rounded-[14px] !border !border-blue-400/20 bg-blue-600/15 px-4 py-[11px] text-[.85rem] font-bold text-slate-200 transition hover:-translate-y-px" (click)="refresh()">Refresh</button>
-        <button type="button" class="rounded-[14px] !border-0 bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-[11px] text-[.85rem] font-bold text-white shadow-[0_12px_20px_rgba(37,99,235,.22)] transition hover:-translate-y-px" (click)="openQuickOrderModal()">Quick Order</button>
+      <div class="flex flex-wrap justify-start gap-3 pt-1">
+        <button type="button" class="rounded-[14px] !border !border-blue-400/20 !bg-blue-600/15 px-4 py-[11px] !text-[.85rem] font-bold !text-slate-200 transition hover:-translate-y-px hover:!bg-blue-500/25" (click)="refresh()">Refresh</button>
+        <button type="button" class="rounded-[14px] !border-0 !bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-[11px] !text-[.85rem] font-bold !text-white shadow-[0_12px_20px_rgba(37,99,235,.22)] transition hover:-translate-y-px" (click)="openQuickOrderModal()">Quick Order</button>
       </div>
     </header>
 

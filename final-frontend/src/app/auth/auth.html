@@ -35,9 +35,10 @@
         </p>
       </div>
 
-      <div class="mt-7 grid grid-cols-2 gap-2 !rounded-full !border !border-slate-400/10 p-1.5" role="tablist" aria-label="Authentication mode">
-        <button type="button" (click)="switchToLogin()" [class]="isLogin ? '!rounded-full !border-0 !bg-blue-600/20 px-3.5 py-3 !text-[.88rem] font-semibold !text-slate-50 shadow-[inset_0_0_0_1px_rgba(96,165,250,.18)]' : '!rounded-full !border-0 !bg-transparent px-3.5 py-3 !text-[.88rem] font-semibold !text-slate-400 hover:!text-slate-100'">Sign in</button>
-        <button type="button" (click)="switchToRegister()" [class]="!isLogin ? '!rounded-full !border-0 !bg-blue-600/20 px-3.5 py-3 !text-[.88rem] font-semibold !text-slate-50 shadow-[inset_0_0_0_1px_rgba(96,165,250,.18)]' : '!rounded-full !border-0 !bg-transparent px-3.5 py-3 !text-[.88rem] font-semibold !text-slate-400 hover:!text-slate-100'">Register</button>
+      <div class="relative mt-7 grid grid-cols-2 gap-2 !rounded-full !border !border-slate-400/10 p-1.5" role="tablist" aria-label="Authentication mode">
+        <span class="pointer-events-none absolute bottom-1.5 left-1.5 top-1.5 w-[calc(50%-5px)] rounded-full bg-blue-600/20 shadow-[inset_0_0_0_1px_rgba(96,165,250,.18)] transition-transform duration-300 ease-out" [class.translate-x-[calc(100%+8px)]]="!isLogin"></span>
+        <button type="button" (click)="switchToLogin()" class="relative z-10 !rounded-full !border-0 !bg-transparent px-3.5 py-3 !text-[.88rem] font-semibold transition-colors duration-300 ease-out" [class.!text-slate-50]="isLogin" [class.!text-slate-400]="!isLogin" [attr.aria-selected]="isLogin">Sign in</button>
+        <button type="button" (click)="switchToRegister()" class="relative z-10 !rounded-full !border-0 !bg-transparent px-3.5 py-3 !text-[.88rem] font-semibold transition-colors duration-300 ease-out" [class.!text-slate-50]="!isLogin" [class.!text-slate-400]="isLogin" [attr.aria-selected]="!isLogin">Register</button>
       </div>
 
       @if (errorMessage) {

@@ -1,15 +1,20 @@
-<div class="min-h-screen p-6 bg-slate-900 text-slate-100">
-  <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,.1),transparent_26%),#020817] px-[18px] py-8 pb-[52px] text-slate-200">
+  <div class="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
     <!-- Left column: Account + Security -->
     <div class="md:col-span-1">
-      <div class="bg-slate-800 rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">Account</h2>
+      <div class="rounded-3xl !border-0 bg-slate-900/70 p-6 shadow-[0_18px_50px_rgba(2,6,23,.28)]">
+        <div class="mb-6 flex items-center gap-3">
+          <div class="grid h-11 w-11 place-items-center rounded-[14px] border border-blue-300/30 bg-blue-500/20 text-sky-300">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5" /><path stroke-linecap="round" d="M5.5 19c.8-3.2 3-5 6.5-5s5.7 1.8 6.5 5" /></svg>
+          </div>
+          <div><p class="m-0 text-[.68rem] font-bold uppercase tracking-[.18em] text-sky-300">Profile</p><h2 class="m-0 mt-1 text-xl font-semibold text-slate-50">Account</h2></div>
+        </div>
         <div class="space-y-3 text-sm text-slate-300">
-          <div class="flex justify-between">
+          <div class="flex justify-between border-b border-slate-400/10 pb-3">
             <span class="font-medium text-slate-200">Username</span>
             <span>{{ user?.username ?? me?.username ?? '—' }}</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between border-b border-slate-400/10 pb-3">
             <span class="font-medium text-slate-200">Role</span>
             <span>{{ me?.role ?? user?.role ?? '—' }}</span>
           </div>
@@ -19,22 +24,22 @@
           </div>
         </div>
 
-        <hr class="my-4 border-slate-700" />
+        <hr class="my-6 border-slate-400/10" />
 
-        <h3 class="text-md font-semibold mb-2 text-slate-200">Security</h3>
+        <h3 class="mb-3 text-base font-semibold text-slate-50">Security</h3>
         <div class="space-y-3">
           <label class="text-sm text-slate-300">Current password</label>
-          <input type="password" [(ngModel)]="currentPassword" class="w-full rounded-md bg-slate-700 border border-slate-600 px-3 py-2 text-slate-100" />
+          <input type="password" [(ngModel)]="currentPassword" class="w-full rounded-[14px] border border-slate-400/15 bg-slate-950/40 px-3.5 py-3 text-slate-50 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10" />
 
           <label class="text-sm text-slate-300">New password</label>
-          <input type="password" [(ngModel)]="newPassword" class="w-full rounded-md bg-slate-700 border border-slate-600 px-3 py-2 text-slate-100" />
+          <input type="password" [(ngModel)]="newPassword" class="w-full rounded-[14px] border border-slate-400/15 bg-slate-950/40 px-3.5 py-3 text-slate-50 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10" />
 
           <label class="text-sm text-slate-300">Confirm new password</label>
-          <input type="password" [(ngModel)]="confirmPassword" class="w-full rounded-md bg-slate-700 border border-slate-600 px-3 py-2 text-slate-100" />
+          <input type="password" [(ngModel)]="confirmPassword" class="w-full rounded-[14px] border border-slate-400/15 bg-slate-950/40 px-3.5 py-3 text-slate-50 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10" />
 
           <div class="flex gap-2 mt-3">
-            <button (click)="changePassword()" [disabled]="changingPassword" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-sm font-semibold">Change password</button>
-            <div class="text-sm text-amber-400 self-center">{{ changePasswordMessage }}</div>
+            <button (click)="changePassword()" [disabled]="changingPassword" class="inline-flex items-center rounded-[14px] bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-[0_12px_20px_rgba(37,99,235,.22)] transition hover:-translate-y-px">Change password</button>
+            <div class="self-center text-sm text-amber-300">{{ changePasswordMessage }}</div>
           </div>
         </div>
       </div>
@@ -42,9 +47,9 @@
 
     <!-- Right column: Orders -->
     <div class="md:col-span-2">
-      <div class="bg-slate-800 rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-slate-100">My Orders</h2>
+      <div class="rounded-3xl !border-0 bg-slate-900/70 p-6 shadow-[0_18px_50px_rgba(2,6,23,.28)]">
+        <div class="mb-6 flex items-center justify-between gap-3">
+          <div><p class="m-0 text-[.68rem] font-bold uppercase tracking-[.18em] text-sky-300">Activity</p><h2 class="m-0 mt-1 text-xl font-semibold text-slate-50">My Orders</h2></div>
           <div class="text-sm text-slate-400">Showing orders for your account</div>
         </div>
 
@@ -54,7 +59,7 @@
         <div *ngIf="!loadingOrders && orders?.length" class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-slate-400 text-left">
+              <tr class="border-b border-slate-400/10 text-left text-slate-400">
                 <th class="px-3 py-2">Order</th>
                 <th class="px-3 py-2">Product</th>
                 <th class="px-3 py-2">Qty</th>
@@ -64,7 +69,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let o of orders" class="border-t border-slate-700">
+              <tr *ngFor="let o of orders" class="border-t border-slate-400/10 transition hover:bg-blue-500/5">
                 <td class="px-3 py-3 text-slate-100">#{{ o.id }}</td>
                 <td class="px-3 py-3">{{ o.product?.name }}</td>
                 <td class="px-3 py-3">{{ o.quantity }}</td>
@@ -72,8 +77,8 @@
                 <td class="px-3 py-3">{{ o.orderDate | date:'short' }}</td>
                 <td class="px-3 py-3">
                   <div class="flex gap-2">
-                    <button (click)="viewOrder(o.id)" class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-sm">View</button>
-                    <button (click)="openQrForOrder(o)" class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-sm">QR</button>
+                    <button (click)="viewOrder(o.id)" class="rounded-[10px] border border-blue-400/20 bg-blue-600/15 px-3 py-1.5 text-sm text-slate-200 transition hover:bg-blue-500/25">View</button>
+                    <button (click)="openQrForOrder(o)" class="rounded-[10px] border border-slate-400/15 bg-slate-400/10 px-3 py-1.5 text-sm text-slate-200 transition hover:bg-slate-400/20">QR</button>
                   </div>
                 </td>
               </tr>
@@ -87,13 +92,13 @@
   </div>
 
   <!-- QR modal -->
-  <div *ngIf="showQrModal" class="fixed inset-0 flex items-center justify-center bg-slate-950/70 z-50 p-4">
-    <div class="relative w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl shadow-slate-950/60">
-      <button type="button" (click)="closeQr()" class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-lg text-slate-100 transition hover:bg-slate-700" aria-label="Close">✕</button>
+  <div *ngIf="showQrModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-[6px]">
+    <div class="relative w-full max-w-2xl rounded-3xl border border-slate-400/15 bg-slate-900 shadow-[0_30px_80px_rgba(2,6,23,.7)]">
+      <button type="button" (click)="closeQr()" class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-400/10 text-lg text-slate-100 transition hover:bg-slate-400/20" aria-label="Close">✕</button>
 
       <div class="p-6 md:p-8">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-center">
-          <div class="flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900/80 p-4 shadow-lg shadow-slate-950/40">
+          <div class="flex items-center justify-center rounded-xl border border-slate-400/15 bg-slate-950/40 p-4 shadow-lg shadow-slate-950/40">
             <img [src]="qrImage" alt="Order QR" class="h-64 w-64 rounded-lg object-contain bg-transparent p-2" />
           </div>
 
@@ -109,8 +114,8 @@
         </div>
 
         <div class="mt-6 flex justify-end gap-2">
-          <button (click)="printQr()" class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-500">Print</button>
-          <button (click)="closeQr()" class="rounded-md bg-slate-700 px-4 py-2 font-medium text-slate-100 transition hover:bg-slate-600">Close</button>
+          <button (click)="printQr()" class="rounded-[14px] bg-gradient-to-br from-blue-600 to-blue-500 px-4 py-2.5 font-bold text-white transition hover:-translate-y-px">Print</button>
+          <button (click)="closeQr()" class="rounded-[14px] border border-slate-400/15 bg-slate-400/10 px-4 py-2.5 font-bold text-slate-100 transition hover:bg-slate-400/20">Close</button>
         </div>
       </div>
     </div>

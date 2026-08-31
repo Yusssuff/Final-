@@ -74,7 +74,7 @@
                 <td class="px-3 py-3">{{ o.product?.name }}</td>
                 <td class="px-3 py-3">{{ o.quantity }}</td>
                 <td class="px-3 py-3">{{ o.totalPrice | currency:'EGP':'code' }}</td>
-                <td class="px-3 py-3">{{ o.orderDate | date:'short' }}</td>
+                <td class="px-3 py-3">{{ o.orderDate | date:'short':'+0300' }}</td>
                 <td class="px-3 py-3">
                   <div class="flex gap-2">
                     <button (click)="viewOrder(o.id)" class="rounded-[10px] border border-blue-400/20 bg-blue-600/15 px-3 py-1.5 text-sm text-slate-200 transition hover:bg-blue-500/25">View</button>
@@ -106,9 +106,10 @@
             <div class="mb-3 text-xs uppercase tracking-[0.18em] text-sky-300">Order QR</div>
             <h3 class="mb-3 text-2xl font-semibold text-white">Order details</h3>
             <div class="space-y-2 text-sm text-slate-300">
-              <p><span class="font-medium text-slate-200">ID:</span> {{ orders[0]?.id ?? '—' }}</p>
-              <p><span class="font-medium text-slate-200">Product:</span> {{ orders[0]?.product?.name ?? '—' }}</p>
-              <p><span class="font-medium text-slate-200">Total:</span> {{ orders[0]?.totalPrice | currency:'EGP':'code' }}</p>
+              <p><span class="font-medium text-slate-200">ID:</span> {{ selectedOrder?.id ?? '—' }}</p>
+              <p><span class="font-medium text-slate-200">Product:</span> {{ selectedOrder?.product?.name ?? '—' }}</p>
+              <p><span class="font-medium text-slate-200">Total:</span> {{ selectedOrder?.totalPrice | currency:'EGP':'code' }}</p>
+              <p><span class="font-medium text-slate-200">Date:</span> {{ selectedOrder?.orderDate | date:'medium':'+0300' }}</p>
             </div>
           </div>
         </div>

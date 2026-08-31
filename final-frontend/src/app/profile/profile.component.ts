@@ -18,6 +18,7 @@ export class ProfileComponent implements OnInit {
   user: any = null;
   me: any = null;
   orders: any[] = [];
+  selectedOrder: any = null;
   loadingOrders = false;
   error = '';
 
@@ -58,7 +59,15 @@ export class ProfileComponent implements OnInit {
     this.loadingOrders = true;
     this.orderService.getMyOrders().subscribe({
       next: (list) => {
-        this.orders = list || [];
+        this.orders = (list || []).map((order: any) => ({
+          ...order,
+          orderDate:
+            order.orderDate ??
+            order.OrderDate ??
+            order.createdAt ??
+            order.CreatedAt ??
+            null,
+        }));
         this.loadingOrders = false;
       },
       error: (err) => {
@@ -74,6 +83,7 @@ export class ProfileComponent implements OnInit {
   }
 
   async openQrForOrder(order: any): Promise<void> {
+    this.selectedOrder = order;
     const orderUrl = `${window.location.origin}/order-details?id=${order.id}`;
     try {
       this.qrImage = await this.qrService.toDataUrl(orderUrl, { width: 300 });
@@ -87,6 +97,7 @@ export class ProfileComponent implements OnInit {
   closeQr(): void {
     this.showQrModal = false;
     this.qrImage = null;
+    this.selectedOrder = null;
   }
 
   printQr(): void {

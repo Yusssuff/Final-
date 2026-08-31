@@ -123,6 +123,8 @@ export class ProductsDataSource
 
   loading = false;
 
+  private pendingUpdatedProductId: number | null = null;
+
   constructor() {
     super({
       data: [],
@@ -192,9 +194,23 @@ export class ProductsDataSource
 
   get(APIURL: string): Observable<any> {
     return this.api.get<Product[]>(APIURL).pipe(
-      map((products) => ({
-        value: Array.isArray(products) ? products : [],
-      })),
+      map((products) => {
+        const allProducts = Array.isArray(products) ? products : [];
+        const filterUrl = decodeURIComponent(APIURL).replace(/\+/g, ' ');
+        const idMatch = filterUrl.match(
+          /(?:\$filter=)?\s*id\s*(?:eq|=)\s*['"]?(\d+)['"]?/i,
+        );
+        const queryIdMatch = filterUrl.match(/[?&]id=['"]?(\d+)['"]?/i);
+        const requestedId = Number(
+          idMatch?.[1] ?? queryIdMatch?.[1] ?? this.pendingUpdatedProductId,
+        );
+        this.pendingUpdatedProductId = null;
+        const result = Number.isInteger(requestedId)
+          ? allProducts.filter((product) => product.id === requestedId)
+          : allProducts;
+
+        return { value: result };
+      }),
     );
   }
 
@@ -210,6 +226,11 @@ export class ProductsDataSource
   }
 
   patch(data: any, id: string): Observable<any> {
+    const productId = Number(id);
+    if (Number.isInteger(productId) && productId > 0) {
+      this.pendingUpdatedProductId = productId;
+    }
+
     const existingProduct = this.data.find(
       (product) => String(product.id) === String(id),
     );

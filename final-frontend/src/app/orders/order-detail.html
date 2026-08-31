@@ -41,7 +41,7 @@
 
         <div class="rounded-xl bg-slate-800 p-4">
           <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Order date</p>
-          <p class="mt-2 text-xl font-semibold">{{ order.orderDate | date: 'medium' }}</p>
+          <p class="mt-2 text-xl font-semibold">{{ order.orderDate | date: 'medium':'+0300' }}</p>
         </div>
       </div>
     </div>
